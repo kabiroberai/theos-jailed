@@ -1,0 +1,8 @@
+#!/bin/bash
+
+INSTALL_PATH="$THEOS/templates/ios/kabiroberai/"
+
+cd "$(dirname "$0")"
+nicify.pl template || exit 1
+[ -d "$INSTALL_PATH" ] || mkdir "$INSTALL_PATH"
+mv iphone_jailed.nic.tar "$INSTALL_PATH/jailed.nic.tar" && echo "[info] Successfully installed template in $INSTALL_PATH"

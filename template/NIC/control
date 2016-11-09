@@ -1,0 +1,5 @@
+name "iphone/jailed"
+constrain file "control" to package
+constrain "theos" to link_theos
+ignore USER
+ignore PACKAGENAME
