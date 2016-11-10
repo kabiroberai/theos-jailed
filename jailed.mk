@@ -1,7 +1,6 @@
-ifeq ($(THEOS_CURRENT_INSTANCE),)
-	include $(THEOS_MODULE_PATH)/jailed/master/jailed.mk
-else
-	ifeq ($(_THEOS_CURRENT_TYPE),tweak)
-		include $(THEOS_MODULE_PATH)/jailed/instance/jailed.mk
-	endif
-endif
+TARGET_CODESIGN =
+THEOS_LIBRARY_PATH += -Llib
+_THEOS_INTERNAL_LDFLAGS += -Flib -lsubstrate
+_THEOS_TARGET_DEFAULT_USE_SUBSTRATE = 0
+
+include $(THEOS_MAKE_PATH)/tweak.mk
