@@ -1,15 +1,13 @@
 #!/bin/bash
 
-#
-# You shouldn't need to change these unless you have multiple Dev certs
-#
 IPA="app.ipa"
-COMMAND=$1
-MOBILEPROVISION=$2
 DEV_CERT_NAME="iPhone Developer"
-CODESIGN_NAME=`security dump-keychain login.keychain|grep "$DEV_CERT_NAME"|head -n1|cut -f4 -d \"|cut -f1 -d\"`
 TMPDIR=".patchapp.cache"
 DYLIB=".theos/obj/@@PROJECTNAME@@.dylib"
+
+COMMAND=$1
+MOBILEPROVISION=$2
+CODESIGN_NAME=`security dump-keychain login.keychain|grep "$DEV_CERT_NAME"|head -n1|cut -f4 -d \"|cut -f1 -d\"`
 
 #
 # Usage / syntax
@@ -33,10 +31,6 @@ USAGE
 # Setup all the things.
 #
 function setup_environment {
-	if [ "$IPA" == "" ]; then
-		usage
-		exit 1
-	fi
 	if [ ! -r "$IPA" ]; then
 		echo "$IPA not found or not readable"
 		exit 1
@@ -254,11 +248,10 @@ function ipa_patch {
 	# copy the files into the .app folder
 	echo '[+] Copying .dylib dependences into "'$TMPDIR/Payload/$APP'"'
 	cp "$DYLIB" $TMPDIR/Payload/$APP/
-	cp lib/libsubstrate.dylib $TMPDIR/Payload/$APP/CydiaSubstrate
 
 	# sign all of the .dylib files we're injecting into the app
 	echo '[+] Codesigning .dylib dependencies with certificate "'$CODESIGN_NAME'"'
-	for file in "$APPDIR/${DYLIB##*/}" "$APPDIR/CydiaSubstrate" "$DYLIB"; do
+	for file in "$APPDIR/${DYLIB##*/}" "$DYLIB"; do
 		echo '     '$file
 		codesign -fs "$CODESIGN_NAME" "$file" >& /dev/null
 		if [ "$?" != "0" ]; then
