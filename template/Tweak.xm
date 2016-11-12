@@ -1,9 +1,9 @@
-#import "lib/Cycript.framework/Headers/Cycript.h"
+#import "Cycript.framework/Headers/Cycript.h"
 
 %ctor {
 	#ifdef DEBUG
 	CYListenServer(31337);
-	#endif // DEBUG
+	#endif
 }
 
 /* How to Hook with Logos
