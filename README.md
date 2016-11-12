@@ -3,9 +3,8 @@ Theos and Cycript for non-jailbroken iOS devices
 This is a module for Theos designed to work with apps on non-jailbroken iOS devices. For the original (iOS 8/9) theos-jailed, see https://github.com/BishopFox/theos-jailed.
 
 * You use it just as you would for a jailbroken device tweak (edit Tweak.xm then "make")
-* It integrates CydiaSubstrate
 * It integrates Cycript
-* It patches App Store apps (.ipa files) to load CydiaSubstrate, your tweak, Cycript, etc
+* It patches App Store apps (.ipa files) to load your tweak, Cycript, etc
 * It re-signs the patched app using your Apple iOS Developer certificate
 * You can then easily (re)install the patched app to your jailed device
 * You can remotely attach to Cycript using `cycript -r hostname:31337`
