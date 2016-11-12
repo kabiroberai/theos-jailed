@@ -33,12 +33,12 @@ Quick How-to
 * Save the Provisioning Profile somewhere on your computer, or add it to Xcode
 * Edit Tweak.xm as necessary
 * Run `make`
-* Run `./patchapp.sh <command> <profile>`.
-* Replace `<command>` with one of the following:
- * `install`: Inject the tweak into the .ipa and install it on your USB-connected device
- * `debug`: Like `install`, but also debug the app with LLDB
- * `patch`: Just inject the tweak into the .ipa (doesn't require `ios-deploy`)
-* Replace `<profile>` with one of the following:
- * A path to a .mobileprovision file
- * A bundle ID for which you have a provisioning profile in Xcode
- * The `-w` flag to use Xcode's Wildcard App ID
+* Run `./patchapp.sh <command> <profile>`
+    * Replace `<command>` with one of the following:
+        * `install`: Inject the tweak into the .ipa and install it on your USB-connected device
+        * `debug`: Like `install`, but also debug the app with LLDB
+        * `patch`: Just inject the tweak into the .ipa (doesn't require `ios-deploy`)
+    * Replace `<profile>` with one of the following:
+        * A path to a .mobileprovision file
+        * A bundle ID for which you have a provisioning profile in Xcode
+        * The `-w` flag to use Xcode's Wildcard App ID
