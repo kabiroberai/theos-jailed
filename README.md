@@ -18,14 +18,10 @@ Requirements
 
 Quick How-to
 ============
-1. [Install and configure Theos](https://github.com/theos/theos/wiki/Installation). Be sure `$THEOS/bin` is in your PATH.
+1. [Install and configure Theos](https://github.com/theos/theos/wiki/Installation)
 * Extract and decrypt your target app. Save as a .ipa
-* Clone this project to the Theos mod directory
-
-        git clone https://github.com/kabiroberai/theos-jailed.git $THEOS/mod/jailed
-* Install the accompanying template
-
-        $THEOS/mod/jailed/install_template
+* Clone this project to your computer (recommended), or download it as a ZIP
+* Install the module and template by runnning `./install`
 * Install [**optool**](https://github.com/alexzielenski/optool/releases/latest) and [**ios-deploy**](https://github.com/phonegap/ios-deploy#installation) to any directory in your PATH
 * Change to the base directory for your new tweak (eg. `cd ~/Desktop`)
 * Run `nic.pl` and choose the **jailed** template

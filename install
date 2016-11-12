@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+cd "$(dirname "$0")"
+
+# Modify these to specify a custom install path
+THEOS_PATH="$THEOS"
+MODULE_INSTALL_PATH="$THEOS_PATH/mod/jailed/"
+TEMPLATE_INSTALL_PATH="$THEOS_PATH/templates/ios/kabiroberai/"
+
+if [ ! -d "$THEOS_PATH" ]; then
+	echo "[error] $THEOS_PATH is not a directory, aborting..."
+	exit 1
+fi
+
+if [ ! -d "$MODULE_INSTALL_PATH" ]; then
+	echo "[info] Making directory $MODULE_INSTALL_PATH"
+	mkdir "$MODULE_INSTALL_PATH"
+fi
+
+cp module/* "$MODULE_INSTALL_PATH"
+echo "[info] Successfully installed module in $MODULE_INSTALL_PATH"
+
+"$THEOS_PATH/bin/nicify.pl" template
+
+if [ ! -d "$TEMPLATE_INSTALL_PATH" ]; then
+	echo "[info] Making directory $TEMPLATE_INSTALL_PATH"
+	mkdir "$TEMPLATE_INSTALL_PATH"
+fi
+
+mv iphone_jailed.nic.tar "$TEMPLATE_INSTALL_PATH/jailed.nic.tar"
+echo "[info] Successfully installed template in $TEMPLATE_INSTALL_PATH"
