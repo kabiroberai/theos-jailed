@@ -2,30 +2,24 @@
 set -e
 cd "$(dirname "$0")"
 
+function error { echo "[error] $1" >&2; exit 1; }
+function info { echo "[info] $1"; }
+
 # Modify these to specify a custom install path
 THEOS_PATH="$THEOS"
-MODULE_INSTALL_PATH="$THEOS_PATH/mod/jailed/"
-TEMPLATE_INSTALL_PATH="$THEOS_PATH/templates/ios/kabiroberai/"
+MODULE_PATH="$THEOS_PATH/mod/jailed/"
+TEMPLATE_PATH="$THEOS_PATH/templates/ios/kabiroberai/"
 
-if [ ! -d "$THEOS_PATH" ]; then
-	echo "[error] $THEOS_PATH is not a directory, aborting..."
-	exit 1
-fi
+[ -d "$THEOS_PATH" ] || error "$THEOS_PATH is not a directory, aborting..."
 
-if [ ! -d "$MODULE_INSTALL_PATH" ]; then
-	echo "[info] Making directory $MODULE_INSTALL_PATH"
-	mkdir "$MODULE_INSTALL_PATH"
-fi
+# Install module
+mkdir -p "$MODULE_PATH"
+cp -a module/* "$MODULE_PATH"
+info "Successfully installed module in $MODULE_PATH"
 
-cp module/* "$MODULE_INSTALL_PATH"
-echo "[info] Successfully installed module in $MODULE_INSTALL_PATH"
-
+# Install template
 "$THEOS_PATH/bin/nicify.pl" template
-
-if [ ! -d "$TEMPLATE_INSTALL_PATH" ]; then
-	echo "[info] Making directory $TEMPLATE_INSTALL_PATH"
-	mkdir "$TEMPLATE_INSTALL_PATH"
-fi
-
-mv iphone_jailed.nic.tar "$TEMPLATE_INSTALL_PATH/jailed.nic.tar"
-echo "[info] Successfully installed template in $TEMPLATE_INSTALL_PATH"
+mkdir -p "$TEMPLATE_PATH"
+rm -rf "$TEMPLATE_PATH/*"
+mv *.nic.tar "$TEMPLATE_PATH/jailed.nic.tar"
+info "Successfully installed template in $TEMPLATE_PATH"

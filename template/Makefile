@@ -1,4 +1,3 @@
-DEBUG=0
 include @@THEOS@@/makefiles/common.mk
 
 TWEAK_NAME = @@PROJECTNAME@@

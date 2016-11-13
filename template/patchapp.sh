@@ -3,11 +3,16 @@
 IPA="app.ipa"
 DEV_CERT_NAME="iPhone Developer"
 TMPDIR=".patchapp.cache"
-DYLIB=".theos/obj/@@PROJECTNAME@@.dylib"
 
 COMMAND=$1
 MOBILEPROVISION=$2
 CODESIGN_NAME=`security dump-keychain login.keychain|grep "$DEV_CERT_NAME"|head -n1|cut -f4 -d \"|cut -f1 -d\"`
+DYLIB=`readlink product/@@PROJECTNAME@@.dylib`
+
+if [ "$?" != "0" ] || [ ! -r "$DYLIB" ]; then
+	echo "dylib not found or readable. Have you ran 'make' yet?"
+	exit 1
+fi
 
 #
 # Usage / syntax
@@ -317,11 +322,15 @@ XML
 	rm -f "${IPA%*.ipa}-patched.ipa" >/dev/null 2>&1
 	zip -9r "${IPA%*.ipa}-patched.ipa" Payload/ >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
-		echo "Failed to compress the app into an .ipa file."
+		echo "Failed to compress the app into a .ipa file."
 		exit 1
 	fi
 	IPA=${IPA#../*}
-	mv "${IPA%*.ipa}-patched.ipa" ..
+	mv "${IPA%*.ipa}-patched.ipa" ../product/
+	if [ "$?" != "0" ]; then
+		echo "Failed to move .ipa file into product folder."
+		exit 1
+	fi
 	echo "[+] Wrote \"${IPA%*.ipa}-patched.ipa\""
 	echo "[+] Great success!"
 	cd - >/dev/null 2>&1
