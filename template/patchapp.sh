@@ -1,18 +1,15 @@
 #!/bin/bash
 
+#
+# Config
+#
 IPA="app.ipa"
 DEV_CERT_NAME="iPhone Developer"
+PRODUCT_DIR="."
 TMPDIR=".patchapp.cache"
-
+DYLIB=".theos/latest.dylib"
 COMMAND=$1
 MOBILEPROVISION=$2
-CODESIGN_NAME=`security dump-keychain login.keychain|grep "$DEV_CERT_NAME"|head -n1|cut -f4 -d \"|cut -f1 -d\"`
-DYLIB=`readlink product/@@PROJECTNAME@@.dylib`
-
-if [ "$?" != "0" ] || [ ! -r "$DYLIB" ]; then
-	echo "dylib not found or readable. Have you ran 'make' yet?"
-	exit 1
-fi
 
 #
 # Usage / syntax
@@ -36,6 +33,21 @@ USAGE
 # Setup all the things.
 #
 function setup_environment {
+
+	CODESIGN_NAME=`security dump-keychain login.keychain|grep "$DEV_CERT_NAME"|head -n1|cut -f4 -d \"|cut -f1 -d\"`
+
+	if [ "$?" != "0" ]; then
+		echo "Could not get codesign name"
+		exit 1
+	fi
+
+	DYLIB=`readlink $DYLIB`
+
+	if [ "$?" != "0" ] || [ ! -r "$DYLIB" ]; then
+		echo "Tweak dylib not found or readable. Have you run 'make' yet?"
+		exit 1
+	fi
+
 	if [ ! -r "$IPA" ]; then
 		echo "$IPA not found or not readable"
 		exit 1
@@ -260,7 +272,7 @@ function ipa_patch {
 		echo '     '$file
 		codesign -fs "$CODESIGN_NAME" "$file" >& /dev/null
 		if [ "$?" != "0" ]; then
-			echo "Codesign failed. Have you ran 'make' yet?"
+			echo "Codesign failed. Have you run 'make' yet?"
 			exit 1
 		fi
 	done
@@ -326,9 +338,10 @@ XML
 		exit 1
 	fi
 	IPA=${IPA#../*}
-	mv "${IPA%*.ipa}-patched.ipa" ../product/
+	mkdir -p "../$PRODUCT_DIR"
+	mv "${IPA%*.ipa}-patched.ipa" "../$PRODUCT_DIR/"
 	if [ "$?" != "0" ]; then
-		echo "Failed to move .ipa file into product folder."
+		echo "Failed to move .ipa file into $PRODUCT_DIR."
 		exit 1
 	fi
 	echo "[+] Wrote \"${IPA%*.ipa}-patched.ipa\""

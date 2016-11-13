@@ -10,7 +10,7 @@ THEOS_PATH="$THEOS"
 MODULE_PATH="$THEOS_PATH/mod/jailed/"
 TEMPLATE_PATH="$THEOS_PATH/templates/ios/kabiroberai/"
 
-[ -d "$THEOS_PATH" ] || error "$THEOS_PATH is not a directory, aborting..."
+[ -d "$THEOS_PATH" ] || error "$THEOS_PATH is not a directory. Aborting..."
 
 # Install module
 mkdir -p "$MODULE_PATH"
