@@ -14,12 +14,12 @@ TEMPLATE_PATH="$THEOS_PATH/templates/ios/kabiroberai/"
 
 # Install module
 mkdir -p "$MODULE_PATH"
+rm -rf "$MODULE_PATH"/*
 cp -a module/* "$MODULE_PATH"
 info "Successfully installed module in $MODULE_PATH"
 
 # Install template
 "$THEOS_PATH/bin/nicify.pl" template
 mkdir -p "$TEMPLATE_PATH"
-rm -rf "$TEMPLATE_PATH/*"
 mv *.nic.tar "$TEMPLATE_PATH/jailed.nic.tar"
 info "Successfully installed template in $TEMPLATE_PATH"
