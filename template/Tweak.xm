@@ -1,4 +1,4 @@
-#import "Cycript.framework/Headers/Cycript.h"
+#import <Cycript/Cycript.h>
 
 %ctor {
 	#ifdef DEBUG
