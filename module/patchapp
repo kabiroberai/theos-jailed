@@ -7,7 +7,7 @@ IPA="app.ipa"
 DEV_CERT_NAME="iPhone Developer"
 ENTITLEMENTS=".entitlements"
 TMPDIR=".patchapp.cache"
-PRODUCT_DIR="." # packages
+PACKAGES_DIR="." # packages
 
 COMMAND=$1
 MOBILEPROVISION=$2
@@ -185,7 +185,7 @@ INFO
 	      so it must be deleted first. This only needs to be done
 	      once per patched application.
 2. Run "$0 install [file.mobileprovision | your.bundle.id]" as described above
-3. If "$0 install" did not work for whatever reason, 
+3. If "$0 install" didn't work for whatever reason, 
    replace "install" with "patch", and do the following
 	a. In Xcode goto Window / Devices
 	b. Under "Installed Apps" click the + button
@@ -320,10 +320,10 @@ XML
 		error "Failed to compress the app into a .ipa file."
 	fi
 	IPA=${IPA#../*}
-	mkdir -p "../$PRODUCT_DIR"
-	mv "${IPA%*.ipa}-patched.ipa" "../$PRODUCT_DIR/"
+	mkdir -p "../$PACKAGES_DIR"
+	mv "${IPA%*.ipa}-patched.ipa" "../$PACKAGES_DIR/"
 	if [ "$?" != "0" ]; then
-		error "Failed to move .ipa file into $PRODUCT_DIR."
+		error "Failed to move .ipa file into $PACKAGES_DIR."
 	fi
 	log "Wrote \"${IPA%*.ipa}-patched.ipa\""
 	log "Great success!"

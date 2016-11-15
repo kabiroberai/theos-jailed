@@ -6,20 +6,23 @@ function error { echo "[error] $1" >&2; exit 1; }
 function info { echo "[info] $1"; }
 
 # Modify these to specify a custom install path
-THEOS_PATH="$THEOS"
-MODULE_PATH="$THEOS_PATH/mod/jailed/"
-TEMPLATE_PATH="$THEOS_PATH/templates/ios/kabiroberai/"
+THEOS_DEFAULT_PATH="$THEOS"
+TEMPLATE_DIR="kabiroberai"
 
-[ -d "$THEOS_PATH" ] || error "$THEOS_PATH is not a directory. Aborting..."
+THEOS_PATH="${1:-$THEOS_DEFAULT_PATH}" # $1 overrides THEOS_DEFAULT_PATH
+MODULE_PATH="$THEOS_PATH/mod/jailed/"
+TEMPLATE_PATH="$THEOS_PATH/templates/ios/$TEMPLATE_DIR/"
+
+[ -d "$THEOS_PATH" ] || error "'$THEOS_PATH' is not a directory. Aborting..."
 
 # Install module
 mkdir -p "$MODULE_PATH"
 rm -rf "$MODULE_PATH"/*
 cp -a module/* "$MODULE_PATH"
-info "Successfully installed module in $MODULE_PATH"
+info "Successfully installed module in '$MODULE_PATH'"
 
 # Install template
 "$THEOS_PATH/bin/nicify.pl" template
 mkdir -p "$TEMPLATE_PATH"
 mv *.nic.tar "$TEMPLATE_PATH/jailed.nic.tar"
-info "Successfully installed template in $TEMPLATE_PATH"
+info "Successfully installed template in '$TEMPLATE_PATH'"
