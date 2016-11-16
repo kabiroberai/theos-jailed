@@ -1,10 +1,7 @@
+#if CYPORT > 0
 #import <Cycript/Cycript.h>
-
-%ctor {
-	#ifdef DEBUG
-	CYListenServer(31337);
-	#endif
-}
+%ctor { CYListenServer(CYPORT); }
+#endif
 
 /* How to Hook with Logos
 Hooks are written with syntax similar to that of an Objective-C @implementation.
