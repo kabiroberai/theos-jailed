@@ -17,22 +17,6 @@ function log { echo "[+] $1"; }
 function error { echo "$1" >&2; exit 1; }
 
 #
-# Usage / syntax
-#
-function usage {
-	cat <<USAGE
-Usage: $0 <command> [file.mobileprovision | your.bundle.id]
-Where 'command' is one of:
-	info    - Show the information required to create a Provisioning Profile
-	          that matches the specified .ipa file
-	patch   - Inject the tweak into the specified .ipa file.
-			  Uses a wildcard profile if you don't specify one
-	install - Patch and deploy the app onto your device via USB
-   	debug   - Like deploy, but also debug the app with LLDB
-USAGE
-}
-
-#
 # Setup all the things.
 #
 function setup_environment {
@@ -93,9 +77,8 @@ function ipa_info {
 ==================
 = What to do now =
 ==================
-1. Build your Theos tweak if you haven't already done so. Just run "make".
-2. Create a provisioning profile for this app (run "$0 info" for help)
-3. Run "$0 install <profile>" to patch and install the .ipa, replacing <profile> with:
+1. Create a provisioning profile for this app (run "make info" for help)
+2. Run "make ipa deploy PROFILE=<profile>" to patch and install the .ipa, replacing <profile> with:
    	A .mobileprovision file
    	A bundle id
    	Or leave it blank to use a wildcard profile
@@ -136,11 +119,7 @@ INFO
 				for group in `dd if="$ENTITLEMENTS.xml" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do #|tail -n1` #|cut -f2 -d\>|cut -f1 -d\<`
 					GROUP_ID=`echo $group | cut -f2 -d\> | cut -f1 -d\<`-patched
 					echo "    $GROUP_ID"
-				done
-				# for group in `dd if="$ENTITLEMENTS.xml" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do #|tail -n1` #|cut -f2 -d\>|cut -f1 -d\<`
-				# 	GROUP_ID=`echo $group | cut -f2 -d\> | cut -f1 -d\<`-patched
-				# 	echo "    $GROUP_ID"
-				# done				
+				done			
 				;;
 			com.apple.developer.associated-domains)
 				echo ">>> Associated Domains"
@@ -184,9 +163,9 @@ INFO
 	Note: You can't install over the top of the real application,
 	      so it must be deleted first. This only needs to be done
 	      once per patched application.
-2. Run "$0 install [file.mobileprovision | your.bundle.id]" as described above
-3. If "$0 install" didn't work for whatever reason, 
-   replace "install" with "patch", and do the following
+2. Run "make ipa deploy PROFILE=[file.mobileprovision | your.bundle.id]" as described above
+3. If "make ipa deploy" didn't work for whatever reason, 
+   just run "make ipa", and do the following
 	a. In Xcode goto Window / Devices
 	b. Under "Installed Apps" click the + button
 	c. Browse to the patched .ipa file and cross your fingers
@@ -198,7 +177,7 @@ INFO
 Do all of the things mentioned under "What to do now", above.
 Make sure that the provisioning profile contains the correct entitlements (see above).
 Once you have installed the provisioning profile on your device, run the following command:
-    $0 patch [file.mobileprovision | your.bundle.id]
+    make ipa install PROFILE=[file.mobileprovision | your.bundle.id]
 
 Bundle ID: $BUNDLE_ID
 Required Entitlements: 
@@ -259,7 +238,7 @@ function ipa_patch {
 		echo '     '$file
 		codesign -fs "$CODESIGN_NAME" "$file" >& /dev/null
 		if [ "$?" != "0" ]; then
-			error "Codesign failed. Have you run 'make' yet?"
+			error "Codesign failed"
 		fi
 	done
 
@@ -354,7 +333,6 @@ case $COMMAND in
 		ipa_deploy "d"
 		;;
 	*)
-		usage
 		exit 1
 		;;
 esac
