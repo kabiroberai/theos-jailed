@@ -5,6 +5,6 @@ TWEAK_NAME = @@PROJECTNAME@@
 
 @@PROJECTNAME@@_CFLAGS += -F.
 @@PROJECTNAME@@_LDFLAGS += -F. -lsqlite3 -lc++
-@@PROJECTNAME@@_FRAMEWORKS += UIKit JavaScriptCore Cycript
+@@PROJECTNAME@@_FRAMEWORKS += JavaScriptCore Cycript
 
 include $(THEOS_MODULE_PATH)/jailed/jailed.mk
