@@ -244,14 +244,14 @@ function ipa_patch {
 		error "Install optool and add it to your PATH: https://github.com/alexzielenski/optool"
 	fi
 
-	DEVELOPER_ID=`echo $CODESIGN_NAME | cut -f2 -d \( | cut -f1 -d\)`
+	DEVELOPER_ID=`echo $CODESIGN_NAME | cut -f2 -d\( | cut -f1 -d\)`
 	if [ "$?" != "0" ]; then
 		error "Error getting \"$DEV_CERT_NAME\" certificate ID."
 	fi
 
 	# copy the files into the .app folder
-	log "Copying .dylib dependences into \"$TMPDIR/Payload/$APP\""
-	cp "$DYLIB" "$TMPDIR/Payload/$APP/"
+	log "Copying .dylib dependences into \"$APPDIR\""
+	cp "$DYLIB" "$APPDIR"
 
 	# sign all of the .dylib files we're injecting into the app
 	log "Codesigning .dylib dependencies with certificate \"$CODESIGN_NAME\""
