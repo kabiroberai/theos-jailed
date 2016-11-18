@@ -12,9 +12,11 @@ PACKAGES_DIR="." # packages
 COMMAND=$1
 MOBILEPROVISION=$2
 DYLIB=$3
+USE_CYCRIPT=$4
 
 function log { echo "[+] $1"; }
 function error { echo "$1" >&2; exit 1; }
+INDENT="     "
 
 #
 # Setup all the things.
@@ -232,25 +234,26 @@ function ipa_patch {
 	log "Copying .dylib dependences into \"$APPDIR\""
 	cp "$DYLIB" "$APPDIR"
 
+	PATCH_FILES=("${DYLIB##*/}")
+
+	if [ "$USE_CYCRIPT" = "1" ]; then
+		cp "`dirname "$0"`/cycript.dylib" "$APPDIR"
+		PATCH_FILES+=("cycript.dylib")
+	fi
+
 	# sign all of the .dylib files we're injecting into the app
-	log "Codesigning .dylib dependencies with certificate \"$CODESIGN_NAME\""
-	for file in "$APPDIR/${DYLIB##*/}" "$DYLIB"; do
-		echo '     '$file
-		codesign -fs "$CODESIGN_NAME" "$file" >& /dev/null
+	log "Codesigning and injecting .dylib dependencies with certificate \"$CODESIGN_NAME\""
+	for file in "${PATCH_FILES[@]}"; do
+		echo "$INDENT$file"
+		codesign -fs "$CODESIGN_NAME" "$APPDIR/$file" >& /dev/null
 		if [ "$?" != "0" ]; then
 			error "Codesign failed"
 		fi
+		optool install -c load -p "@executable_path/$file" -t $APPDIR/$APP_BINARY >& /dev/null
+		if [ "$?" != "0" ]; then
+			error "Failed to inject $file into $APPDIR/$APP_BINARY. Can I interest you in debugging the problem?"
+		fi
 	done
-
-	# patch the app to load the new .dylib (sames a _backup file)
-	log "Patching \"$APPDIR/$APP_BINARY\" to load \"${DYLIB##*/}\""
-	if [ "$?" != "0" ]; then
-		error "Failed to grab executable name from Info.plist. Debugging required."
-	fi
-	optool install -c load -p "@executable_path/${DYLIB##*/}" -t $APPDIR/$APP_BINARY >& /dev/null
-	if [ "$?" != "0" ]; then
-		error "Failed to inject "${DYLIB##*/}" into $APPDIR/${APP_BINARY}. Can I interest you in debugging the problem?"
-	fi
 	chmod +x "$APPDIR/$APP_BINARY"
 
 	# generate the correct entitlements
@@ -266,24 +269,24 @@ XML
 	# Make sure to sign any Plugins in the app. Do NOT attempt to optimize this, the order is important!
 	log "Codesigning Plugins and Frameworks with certificate \"$CODESIGN_NAME\""
 	for file in `ls -1 $APPDIR/PlugIns/com.*/com.* 2>/dev/null`; do
-		echo -n '     '
+		echo -n "$INDENT"
 		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file
 	done
 	for file in `ls -d1 $APPDIR/PlugIns/com.* 2>/dev/null`; do
-		echo -n '     '
+		echo -n "$INDENT"
 		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file
 	done
 
 	# re-sign Frameworks, too
 	for file in `ls -1 $APPDIR/Frameworks/* 2>/dev/null`; do
-		echo -n '     '
+		echo -n "$INDENT"
 		codesign -fs "$CODESIGN_NAME" --entitlements "$ENTITLEMENTS.xml" $file
 	done
 
 	# re-sign the .app
 	log "Codesigning the patched .app bundle with certificate \"$CODESIGN_NAME\""
 	cd $TMPDIR/Payload
-	echo -n '     '
+	echo -n "$INDENT"
 	codesign -fs "$CODESIGN_NAME" --deep --entitlements "../../$ENTITLEMENTS.xml" $APP
 	if [ "$?" != "0" ]; then
 		cd ..
@@ -293,18 +296,19 @@ XML
 	
 	# re-pack the .ipa
 	log "Repacking the .ipa"
-	rm -f "${IPA%*.ipa}-patched.ipa" >/dev/null 2>&1
-	zip -9r "${IPA%*.ipa}-patched.ipa" Payload/ >/dev/null 2>&1
+	IPA_PATCHED="${IPA%*.ipa}-patched.ipa"
+	rm -f "$IPA_PATCHED" >/dev/null 2>&1
+	zip -9r "$IPA_PATCHED" Payload/ >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		error "Failed to compress the app into a .ipa file."
 	fi
 	IPA=${IPA#../*}
 	mkdir -p "../$PACKAGES_DIR"
-	mv "${IPA%*.ipa}-patched.ipa" "../$PACKAGES_DIR/"
+	mv "$IPA_PATCHED" "../$PACKAGES_DIR/"
 	if [ "$?" != "0" ]; then
 		error "Failed to move .ipa file into $PACKAGES_DIR."
 	fi
-	log "Wrote \"${IPA%*.ipa}-patched.ipa\""
+	log "Wrote \"$IPA_PATCHED\""
 	log "Great success!"
 	cd - >/dev/null 2>&1
 }
