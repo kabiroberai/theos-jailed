@@ -7,7 +7,7 @@ CYCRIPT="`dirname "$0"`/../lib/Cycript.dylib"
 DEV_CERT_NAME="iPhone Developer"
 ENTITLEMENTS=".entitlements"
 RESDIR="Resources"
-TMPDIR=".patchapp.cache"
+STAGING_DIR=".patchapp.cache"
 PACKAGES_DIR="." # packages
 
 COMMAND=$1
@@ -36,25 +36,25 @@ function setup_environment {
 	fi
 
 	# setup
-	rm -rf "$TMPDIR" >/dev/null 2>&1
-	mkdir "$TMPDIR"
+	rm -rf "$STAGING_DIR" >/dev/null 2>&1
+	mkdir "$STAGING_DIR"
 	ROOT_DIR=`pwd`
 
-	# uncompress the IPA into tmpdir
+	# uncompress the IPA into STAGING_DIR
 	log "Unpacking the .ipa file (\"$IPA\")..."
-	unzip -o -d "$TMPDIR" "$IPA" >/dev/null 2>&1
+	unzip -o -d "$STAGING_DIR" "$IPA" >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		error "Couldn't unzip the IPA file."
 	fi
 
-	cd "$TMPDIR"
+	cd "$STAGING_DIR"
 	cd Payload/*.app
 	if [ "$?" != "0" ]; then
 		error "Couldn't change into Payload folder. Wat."
 	fi
 	APP=`pwd`
 	APP=${APP##*/}
-	APPDIR=$TMPDIR/Payload/$APP
+	APPDIR=$STAGING_DIR/Payload/$APP
 	cd "$ROOT_DIR"
 	BUNDLE_ID=`defaults read $(pwd)/$APPDIR/Info.plist CFBundleIdentifier`-patched
 	APP_BINARY=`defaults read $(pwd)/$APPDIR/Info.plist CFBundleExecutable`
@@ -292,7 +292,7 @@ XML
 
 	# re-sign the .app
 	log "Codesigning the patched .app bundle with certificate \"$CODESIGN_NAME\""
-	cd $TMPDIR/Payload
+	cd $STAGING_DIR/Payload
 	echo -n "$INDENT"
 	codesign -fs "$CODESIGN_NAME" --deep --entitlements "../../$ENTITLEMENTS.xml" $APP
 	if [ "$?" != "0" ]; then
@@ -309,7 +309,6 @@ XML
 	if [ "$?" != "0" ]; then
 		error "Failed to compress the app into a .ipa file."
 	fi
-	IPA=${IPA#../*}
 	mkdir -p "../$PACKAGES_DIR"
 	mv "$IPA_PATCHED" "../$PACKAGES_DIR/"
 	if [ "$?" != "0" ]; then
@@ -324,7 +323,12 @@ function ipa_deploy {
 	if ! hash "ios-deploy" 2>/dev/null; then
 		error "Install ios-deploy and add it to your PATH: https://github.com/phonegap/ios-deploy#installation"
 	fi
-	ios-deploy -$1Wb $TMPDIR/Payload/*.app
+
+	if [ ! -d "$STAGING_DIR"/Payload/*.app ]; then
+		error "Could not find the unpacked app. Have you run 'make ipa' yet?"
+	fi
+
+	ios-deploy -$1Wb $STAGING_DIR/Payload/*.app
 }
 
 #
