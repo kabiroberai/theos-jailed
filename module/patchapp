@@ -3,16 +3,17 @@
 #
 # Config
 #
-IPA="app.ipa"
+CYCRIPT="`dirname "$0"`/cycript.dylib"
 DEV_CERT_NAME="iPhone Developer"
 ENTITLEMENTS=".entitlements"
 TMPDIR=".patchapp.cache"
 PACKAGES_DIR="." # packages
 
 COMMAND=$1
-MOBILEPROVISION=$2
-DYLIB=$3
-USE_CYCRIPT=$4
+IPA=$2
+MOBILEPROVISION=$3
+DYLIB=$4
+USE_CYCRIPT=$5
 
 function log { echo "[+] $1"; }
 function error { echo "$1" >&2; exit 1; }
@@ -30,16 +31,16 @@ function setup_environment {
 	fi
 
 	if [ ! -r "$IPA" ]; then
-		error "$IPA not found or not readable"
+		error "\"$IPA\" not found or not readable"
 	fi
 
 	# setup
 	rm -rf "$TMPDIR" >/dev/null 2>&1
 	mkdir "$TMPDIR"
-	SAVED_PATH=`pwd`
+	ROOT_DIR=`pwd`
 
 	# uncompress the IPA into tmpdir
-	log "Unpacking the .ipa file (\"`pwd`/$IPA\")..."
+	log "Unpacking the .ipa file (\"$IPA\")..."
 	unzip -o -d "$TMPDIR" "$IPA" >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		error "Couldn't unzip the IPA file."
@@ -53,7 +54,7 @@ function setup_environment {
 	APP=`pwd`
 	APP=${APP##*/}
 	APPDIR=$TMPDIR/Payload/$APP
-	cd "$SAVED_PATH"
+	cd "$ROOT_DIR"
 	BUNDLE_ID=`defaults read $(pwd)/$APPDIR/Info.plist CFBundleIdentifier`-patched
 	APP_BINARY=`defaults read $(pwd)/$APPDIR/Info.plist CFBundleExecutable`
 }
@@ -233,11 +234,10 @@ function ipa_patch {
 	# copy the files into the .app folder
 	log "Copying .dylib dependences into \"$APPDIR\""
 	cp "$DYLIB" "$APPDIR"
-
 	PATCH_FILES=("${DYLIB##*/}")
 
 	if [ "$USE_CYCRIPT" = "1" ]; then
-		cp "`dirname "$0"`/cycript.dylib" "$APPDIR"
+		cp "$CYCRIPT" "$APPDIR/cycript.dylib"
 		PATCH_FILES+=("cycript.dylib")
 	fi
 
