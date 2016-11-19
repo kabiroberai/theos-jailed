@@ -6,6 +6,7 @@
 CYCRIPT="`dirname "$0"`/../lib/Cycript.dylib"
 DEV_CERT_NAME="iPhone Developer"
 ENTITLEMENTS=".entitlements"
+RESDIR="Resources"
 TMPDIR=".patchapp.cache"
 PACKAGES_DIR="." # packages
 
@@ -229,6 +230,12 @@ function ipa_patch {
 	DEVELOPER_ID=`echo $CODESIGN_NAME | cut -f2 -d\( | cut -f1 -d\)`
 	if [ "$?" != "0" ]; then
 		error "Error getting \"$DEV_CERT_NAME\" certificate ID."
+	fi
+
+	# copy the resources into the .app folder
+	if [ -d "$RESDIR" ]; then
+		log "Copying resources into \"$APPDIR\""
+		cp -a "$RESDIR"/ "$APPDIR"
 	fi
 
 	# copy the files into the .app folder
