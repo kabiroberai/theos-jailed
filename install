@@ -18,7 +18,7 @@ TEMPLATE_PATH="$THEOS_PATH/templates/ios/$TEMPLATE_DIR/"
 # Install module
 mkdir -p "$MODULE_PATH"
 rm -rf "$MODULE_PATH"/*
-cp -a module/* "$MODULE_PATH"
+cp -a module/ "$MODULE_PATH"
 info "Successfully installed module in '$MODULE_PATH'"
 
 # Install template
