@@ -32,8 +32,6 @@ Quick How-to
 * Take the information from that and create a matching Provisioning Profile
 * Save the Provisioning Profile somewhere on your computer, or add it to Xcode
 * Edit Tweak.xm as necessary
-* Run `make ipa [deploy | lldb] PROFILE=<profile>`
-    * Replace `<profile>` with one of the following:
-        * A path to a .mobileprovision file
-        * A bundle ID for which you have a provisioning profile in Xcode
-        * Or leave it blank to use Xcode's Wildcard App ID
+* Run `make ipa [deploy | lldb] [PROFILE=<mobileprovision | bundle.id>] [USE_CYCRIPT=1]`
+    * If you don't specify `PROFILE`, the script will try to use Xcode's Wildcard App ID
+    * Specifying `USE_CYCRIPT=1` allows you to remotely attach to Cycript using `cycript -r hostname:31337`
