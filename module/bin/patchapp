@@ -237,8 +237,8 @@ function ipa_patch {
 	PATCH_FILES=("${DYLIB##*/}")
 
 	if [ "$USE_CYCRIPT" = "1" ]; then
-		cp "$CYCRIPT" "$APPDIR/Cycript.dylib"
-		PATCH_FILES+=("Cycript.dylib")
+		cp "$CYCRIPT" "$APPDIR"
+		PATCH_FILES+=("${CYCRIPT##*/}")
 	fi
 
 	# sign all of the .dylib files we're injecting into the app
