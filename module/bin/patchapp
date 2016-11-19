@@ -3,7 +3,7 @@
 #
 # Config
 #
-CYCRIPT="`dirname "$0"`/cycript.dylib"
+CYCRIPT="`dirname "$0"`/../lib/Cycript.dylib"
 DEV_CERT_NAME="iPhone Developer"
 ENTITLEMENTS=".entitlements"
 TMPDIR=".patchapp.cache"
@@ -237,8 +237,8 @@ function ipa_patch {
 	PATCH_FILES=("${DYLIB##*/}")
 
 	if [ "$USE_CYCRIPT" = "1" ]; then
-		cp "$CYCRIPT" "$APPDIR/cycript.dylib"
-		PATCH_FILES+=("cycript.dylib")
+		cp "$CYCRIPT" "$APPDIR/Cycript.dylib"
+		PATCH_FILES+=("Cycript.dylib")
 	fi
 
 	# sign all of the .dylib files we're injecting into the app
