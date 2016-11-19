@@ -19,7 +19,7 @@ Quick How-to
 ============
 1. [Install and configure Theos](https://github.com/theos/theos/wiki/Installation)
 * Extract and decrypt your target app. Save as a .ipa
-* Clone this project to your computer (recommended), or download it as a ZIP
+* Clone this project to your computer (use `git clone --recursive` because the repository has submodules)
 * Install the module and template by runnning `./install`
 * Install [**optool**](https://github.com/alexzielenski/optool/releases/latest) and [**ios-deploy**](https://github.com/phonegap/ios-deploy#installation) in any directory in your PATH
 * Change to the base directory for your new tweak (eg. `cd ~/Desktop`)
@@ -29,6 +29,7 @@ Quick How-to
 * Change into your new tweak directory (eg. `cd ~/Desktop/mytweak`)
 * Run `make info` and follow the instructions to create a Provisioning Profile
 * Edit Tweak.xm as necessary
-* Run `make ipa [deploy | lldb] [PROFILE=<mobileprovision | bundle.id>] [USE_CYCRIPT=1]`
+* Run `make ipa [deploy | lldb] [PROFILE=<mobileprovision | bundle.id>] [USE_CYCRIPT=1] [USE_FISHHOOK=1]`
     * If you don't specify `PROFILE`, the script will try to use Xcode's Wildcard App ID
     * Specifying `USE_CYCRIPT=1` allows you to remotely attach to Cycript using `cycript -r hostname:31337`
+    * `USE_FISHHOOK=1` lets you use [fishhook](https://github.com/facebook/fishhook) (remember to `#import <fishhook.h>` as well)
