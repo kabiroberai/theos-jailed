@@ -3,12 +3,13 @@
 #
 # Config
 #
-CYCRIPT="`dirname "$0"`/../lib/Cycript.dylib"
+LIB="`dirname "$0"`/../lib"
+CYCRIPT="$LIB/Cycript.dylib"
 DEV_CERT_NAME="iPhone Developer"
 ENTITLEMENTS=".entitlements"
 RESDIR="Resources"
 STAGING_DIR=".patchapp.cache"
-PACKAGES_DIR="." # packages
+PACKAGES_DIR="."
 
 COMMAND=$1
 IPA=$2
@@ -227,11 +228,6 @@ function ipa_patch {
 		error "Install optool and add it to your PATH: https://github.com/alexzielenski/optool"
 	fi
 
-	DEVELOPER_ID=`echo $CODESIGN_NAME | cut -f2 -d\( | cut -f1 -d\)`
-	if [ "$?" != "0" ]; then
-		error "Error getting \"$DEV_CERT_NAME\" certificate ID."
-	fi
-
 	# copy the resources into the .app folder
 	if [ -d "$RESDIR" ]; then
 		log "Copying resources into \"$APPDIR\""
@@ -239,23 +235,30 @@ function ipa_patch {
 	fi
 
 	# copy the files into the .app folder
-	log "Copying .dylib dependences into \"$APPDIR\""
+	log "Copying .dylib dependencies into \"$APPDIR\""
 	cp "$DYLIB" "$APPDIR"
-	PATCH_FILES=("${DYLIB##*/}")
+	CODESIGN_FILES=("${DYLIB##*/}")
+	INJECT_FILES=("${DYLIB##*/}")
 
 	if [ "$USE_CYCRIPT" = "1" ]; then
 		cp "$CYCRIPT" "$APPDIR"
-		PATCH_FILES+=("${CYCRIPT##*/}")
+		CODESIGN_FILES+=("${CYCRIPT##*/}")
+		INJECT_FILES+=("${CYCRIPT##*/}")
 	fi
 
 	# sign all of the .dylib files we're injecting into the app
-	log "Codesigning and injecting .dylib dependencies with certificate \"$CODESIGN_NAME\""
-	for file in "${PATCH_FILES[@]}"; do
+	log "Codesigning .dylib dependencies with certificate \"$CODESIGN_NAME\""
+	for file in "${CODESIGN_FILES[@]}"; do
 		echo "$INDENT$file"
 		codesign -fs "$CODESIGN_NAME" "$APPDIR/$file" >& /dev/null
 		if [ "$?" != "0" ]; then
 			error "Codesign failed"
 		fi
+	done
+
+	log "Injecting .dylib dependencies with certificate \"$CODESIGN_NAME\""
+	for file in "${INJECT_FILES[@]}"; do
+		echo "$INDENT$file"
 		optool install -c load -p "@executable_path/$file" -t $APPDIR/$APP_BINARY >& /dev/null
 		if [ "$?" != "0" ]; then
 			error "Failed to inject $file into $APPDIR/$APP_BINARY. Can I interest you in debugging the problem?"
@@ -264,7 +267,7 @@ function ipa_patch {
 	chmod +x "$APPDIR/$APP_BINARY"
 
 	# generate the correct entitlements
-	log "Generating entitlements for developer ID $DEVELOPER_ID"
+	log "Generating entitlements"
 	cat <<XML > "$ENTITLEMENTS.xml"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
