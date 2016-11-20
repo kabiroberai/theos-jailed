@@ -31,7 +31,7 @@ function setup_environment {
 	CODESIGN_NAME=`security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\"`
 
 	if [ "$?" != "0" ]; then
-		error "Could not get codesign name"
+		error "Failed to get codesign name"
 	fi
 
 	if [ ! -r "$IPA" ]; then
@@ -44,10 +44,10 @@ function setup_environment {
 	ROOT_DIR=`pwd`
 
 	# uncompress the IPA into STAGING_DIR
-	log 1 "Unpacking `basename $IPA`"
+	log 1 "Unpacking `basename "$IPA"`"
 	unzip -o -d "$STAGING_DIR" "$IPA" >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
-		error "Couldn't unzip the IPA file."
+		error "Failed to unzip \"$IPA\""
 	fi
 
 	cd "$STAGING_DIR"
@@ -55,12 +55,11 @@ function setup_environment {
 	if [ "$?" != "0" ]; then
 		error "Couldn't change into Payload folder. Wat."
 	fi
-	APP=`pwd`
-	APP="`basename "$APP"`"
-	APPDIR=$STAGING_DIR/Payload/$APP
+	APP="`basename "$(pwd)"`"
+	APPDIR="$STAGING_DIR/Payload/$APP"
 	cd "$ROOT_DIR"
-	BUNDLE_ID=`defaults read $(pwd)/$APPDIR/Info.plist CFBundleIdentifier`-patched
-	APP_BINARY=`defaults read $(pwd)/$APPDIR/Info.plist CFBundleExecutable`
+	BUNDLE_ID="`defaults read "$(pwd)/$APPDIR/Info.plist" CFBundleIdentifier`-patched"
+	APP_BINARY="`defaults read "$(pwd)/$APPDIR/Info.plist" CFBundleExecutable`"
 }
 
 #
@@ -203,7 +202,7 @@ function ipa_patch {
 	if [ ! -r "$MOBILEPROVISION" ]; then
 		BUNDLEPROVISION="`grep -Fl "<string>iOS Team Provisioning Profile: $MOBILEPROVISION</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1`"
 		if [ ! -r "$BUNDLEPROVISION" ]; then
-			error "Couldn't find profile for '$MOBILEPROVISION'"
+			error "Failed to find profile for '$MOBILEPROVISION'"
 		fi
 
 		MOBILEPROVISION="$BUNDLEPROVISION"
@@ -263,10 +262,10 @@ XML
 	if [ -d "$APPDIR/PlugIns" ]; then
 		log 3 "Codesigning plugins"
 	fi
-	for file in `ls -1 $APPDIR/PlugIns/com.*/com.* 2>/dev/null`; do
+	for file in `ls -1 "$APPDIR"/PlugIns/com.*/com.* 2>/dev/null`; do
 		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
 	done
-	for file in `ls -d1 $APPDIR/PlugIns/com.* 2>/dev/null`; do
+	for file in `ls -d1 "$APPDIR"/PlugIns/com.* 2>/dev/null`; do
 		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
 	done
 
@@ -274,16 +273,15 @@ XML
 	if [ -d "$APPDIR/Frameworks" ]; then
 		log 3 "Codesigning frameworks"
 	fi
-	for file in `ls -1 $APPDIR/Frameworks/* 2>/dev/null`; do
+	for file in `ls -1 "$APPDIR"/Frameworks/* 2>/dev/null`; do
 		codesign -fs "$CODESIGN_NAME" --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
 	done
 
 	# re-sign the .app
 	log 3 "Codesigning $APP"
-	cd $STAGING_DIR/Payload
+	cd "$STAGING_DIR/Payload"
 	codesign -fs "$CODESIGN_NAME" --deep --entitlements "../../$ENTITLEMENTS.xml" $APP >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
-		cd ..
 		error "Failed to sign $APP with entitlements. You're on your own, sorry."
 	fi
 	cd ..
@@ -312,10 +310,10 @@ function ipa_deploy {
 	fi
 
 	if [ ! -d "$STAGING_DIR"/Payload/*.app ]; then
-		error "Could not find the unpacked app. Have you run 'make ipa' yet?"
+		error "Unpacked app not found. Have you run 'make ipa' yet?"
 	fi
 
-	ios-deploy -$1Wb $STAGING_DIR/Payload/*.app
+	ios-deploy -$1Wb "$STAGING_DIR"/Payload/*.app
 }
 
 #
