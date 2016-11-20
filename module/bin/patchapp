@@ -12,10 +12,6 @@ STAGING_DIR=".patchapp.cache"
 PACKAGES_DIR="."
 
 COMMAND=$1
-IPA=$2
-MOBILEPROVISION=$3
-DYLIB=$4
-USE_CYCRIPT=$5
 
 function begin { printf "\e[1;31m> \e[1;3;39m$1…\e[m\n"; }
 function log_raw { printf "\e[0;3$1m==> \e[1;39m$2\e[m\n"; }
@@ -183,13 +179,13 @@ function ipa_patch {
 	setup_environment
 
 	# https://github.com/dado3212/SnapchatReloaded/blob/master/patchapp.sh
-	if [ ! -r "$MOBILEPROVISION" ]; then
-		BUNDLEPROVISION="`grep -Fl "<string>iOS Team Provisioning Profile: $MOBILEPROVISION</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1`"
-		if [ ! -r "$BUNDLEPROVISION" ]; then
-			error "Failed to find profile for '$MOBILEPROVISION'"
+	if [ ! -r "$PROFILE" ]; then
+		BUNDLEPROFILE="`grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1`"
+		if [ ! -r "$BUNDLEPROFILE" ]; then
+			error "Failed to find profile for '$PROFILE'"
 		fi
 
-		MOBILEPROVISION="$BUNDLEPROVISION"
+		PROFILE="$BUNDLEPROFILE"
 	fi
 
 	if ! hash "optool" 2>/dev/null; then
@@ -239,7 +235,7 @@ function ipa_patch {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 XML
-	strings "$MOBILEPROVISION" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d' >> "$ENTITLEMENTS"
+	strings "$PROFILE" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d' >> "$ENTITLEMENTS"
 	echo "</dict></plist>" >> "$ENTITLEMENTS"
 
 	# Make sure to sign any Plugins in the app. Do NOT attempt to optimize this, the order is important!

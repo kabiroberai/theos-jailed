@@ -11,10 +11,14 @@ _THEOS_TARGET_DEFAULT_USE_SUBSTRATE := 0
 _THEOS_INTERNAL_LDFLAGS += -stdlib=libc++
 
 # Use Xcode's iOS Wildcard App ID by default
-PROFILE ?= *
+export PROFILE ?= *
 
 # Truthy USE_CYCRIPT
-_THEOS_USE_CYCRIPT := $(call __theos_bool,$(USE_CYCRIPT))
+export USE_CYCRIPT := $(call __theos_bool,$(USE_CYCRIPT))
+
+# Export IPA and DYLIB for use in patchapp
+export IPA = $($(TWEAK_NAME)_IPA)
+export DYLIB = $(THEOS_OBJ_DIR)/$(TWEAK_NAME).dylib
 
 ifeq ($(call __theos_bool,$(USE_FISHHOOK)),$(_THEOS_TRUE))
 $(TWEAK_NAME)_FILES += $(THEOS_JAILED_PATH)/lib/fishhook/fishhook.c
