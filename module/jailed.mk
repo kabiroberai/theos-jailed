@@ -7,7 +7,7 @@ TARGET_CODESIGN =
 # Use the internal generator instead of CydiaSubstrate
 _THEOS_TARGET_DEFAULT_USE_SUBSTRATE := 0
 
-# Use libc++ by default
+# Use libc++ by default - for libstdc++ use LDFLAGS += -stdlib=libstdc++
 _THEOS_INTERNAL_LDFLAGS += -stdlib=libc++
 
 # Use Xcode's iOS Wildcard App ID by default
