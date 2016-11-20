@@ -17,8 +17,9 @@ MOBILEPROVISION=$3
 DYLIB=$4
 USE_CYCRIPT=$5
 
-function log { echo "[+] $1"; }
-function error { echo "$1" >&2; exit 1; }
+function begin { printf "\e[1;31m> \e[1;3;39m$1…\e[m\n"; }
+function log { printf "\e[0;3$1m==> \e[1;39m$2…\e[m\n"; }
+function error { printf "\e[0;31m==> \e[1;31mError:\e[m $1\n"; exit 1; }
 INDENT="     "
 
 #
@@ -42,7 +43,7 @@ function setup_environment {
 	ROOT_DIR=`pwd`
 
 	# uncompress the IPA into STAGING_DIR
-	log "Unpacking the .ipa file (\"$IPA\")..."
+	log 1 "Unpacking `basename $IPA`"
 	unzip -o -d "$STAGING_DIR" "$IPA" >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		error "Couldn't unzip the IPA file."
@@ -192,6 +193,9 @@ INFO2
 #
 function ipa_patch {
 
+	DYLIB_NAME="`basename "$DYLIB"`"
+	begin "Patchinig tweak ${DYLIB_NAME%.dylib}"
+
 	setup_environment
 
 	# https://github.com/dado3212/SnapchatReloaded/blob/master/patchapp.sh
@@ -210,15 +214,15 @@ function ipa_patch {
 
 	# copy the resources into the .app folder
 	if [ -d "$RESDIR" ]; then
-		log "Copying resources into \"$APPDIR\""
+		log 2 "Copying resources"
 		cp -a "$RESDIR"/ "$APPDIR"
 	fi
 
 	# copy the files into the .app folder
-	log "Copying .dylib dependencies into \"$APPDIR\""
+	log 2 "Copying .dylib dependencies"
 	cp "$DYLIB" "$APPDIR"
-	CODESIGN_FILES=("`basename "$DYLIB"`")
-	INJECT_FILES=("`basename "$DYLIB"`")
+	CODESIGN_FILES=("$DYLIB_NAME")
+	INJECT_FILES=("$DYLIB_NAME")
 
 	if [ "$USE_CYCRIPT" = "1" ]; then
 		cp "$CYCRIPT" "$APPDIR"
@@ -227,18 +231,16 @@ function ipa_patch {
 	fi
 
 	# sign all of the .dylib files we're injecting into the app
-	log "Codesigning .dylib dependencies with certificate \"$CODESIGN_NAME\""
 	for file in "${CODESIGN_FILES[@]}"; do
-		echo "$INDENT$file"
+		log 3 "Codesigning $file"
 		codesign -fs "$CODESIGN_NAME" "$APPDIR/$file" >& /dev/null
 		if [ "$?" != "0" ]; then
 			error "Codesign failed"
 		fi
 	done
 
-	log "Injecting .dylib dependencies with certificate \"$CODESIGN_NAME\""
 	for file in "${INJECT_FILES[@]}"; do
-		echo "$INDENT$file"
+		log 4 "Injecting $file"
 		optool install -c load -p "@executable_path/$file" -t $APPDIR/$APP_BINARY >& /dev/null
 		if [ "$?" != "0" ]; then
 			error "Failed to inject $file into $APPDIR/$APP_BINARY. Can I interest you in debugging the problem?"
@@ -247,7 +249,7 @@ function ipa_patch {
 	chmod +x "$APPDIR/$APP_BINARY"
 
 	# generate the correct entitlements
-	log "Generating entitlements"
+	log 5 "Generating entitlements"
 	cat <<XML > "$ENTITLEMENTS.xml"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -257,27 +259,23 @@ XML
 	echo "</dict></plist>" >> "$ENTITLEMENTS.xml"
 
 	# Make sure to sign any Plugins in the app. Do NOT attempt to optimize this, the order is important!
-	log "Codesigning Plugins and Frameworks with certificate \"$CODESIGN_NAME\""
+	log 3 "Codesigning Plugins and Frameworks"
 	for file in `ls -1 $APPDIR/PlugIns/com.*/com.* 2>/dev/null`; do
-		echo -n "$INDENT"
-		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file
+		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
 	done
 	for file in `ls -d1 $APPDIR/PlugIns/com.* 2>/dev/null`; do
-		echo -n "$INDENT"
-		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file
+		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
 	done
 
 	# re-sign Frameworks, too
 	for file in `ls -1 $APPDIR/Frameworks/* 2>/dev/null`; do
-		echo -n "$INDENT"
-		codesign -fs "$CODESIGN_NAME" --entitlements "$ENTITLEMENTS.xml" $file
+		codesign -fs "$CODESIGN_NAME" --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
 	done
 
 	# re-sign the .app
-	log "Codesigning the patched .app bundle with certificate \"$CODESIGN_NAME\""
+	log 3 "Codesigning $APP"
 	cd $STAGING_DIR/Payload
-	echo -n "$INDENT"
-	codesign -fs "$CODESIGN_NAME" --deep --entitlements "../../$ENTITLEMENTS.xml" $APP
+	codesign -fs "$CODESIGN_NAME" --deep --entitlements "../../$ENTITLEMENTS.xml" $APP >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		cd ..
 		error "Failed to sign $APP with entitlements. You're on your own, sorry."
@@ -285,7 +283,7 @@ XML
 	cd ..
 	
 	# re-pack the .ipa
-	log "Repacking the .ipa"
+	log 1 "Repacking $APP"
 	IPA_PATCHED="`basename "${IPA%*.ipa}-patched.ipa"`"
 	zip -9r "$IPA_PATCHED" Payload/ >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
@@ -297,8 +295,8 @@ XML
 	if [ "$?" != "0" ]; then
 		error "Failed to move .ipa file into $PACKAGES_DIR."
 	fi
-	log "Wrote \"$IPA_PATCHED\""
-	log "Great success!"
+	log 6 "Wrote \"$IPA_PATCHED\""
+	log 6 "Great success!"
 	cd - >/dev/null 2>&1
 }
 
