@@ -6,7 +6,7 @@
 LIB="`dirname "$0"`/../lib"
 CYCRIPT="$LIB/Cycript.dylib"
 DEV_CERT_NAME="iPhone Developer"
-ENTITLEMENTS=".entitlements"
+ENTITLEMENTS=".entitlements.xml"
 RESDIR="Resources"
 STAGING_DIR=".patchapp.cache"
 PACKAGES_DIR="."
@@ -67,6 +67,8 @@ function setup_environment {
 #
 function ipa_info {
 
+	begin "Generating info for `basename "$IPA"`"
+
 	setup_environment
 	
 	cat <<INFO
@@ -92,11 +94,11 @@ function ipa_info {
 	b. Under "App Services" enable the following services:
 
 INFO
-	codesign -d --entitlements - "$APPDIR/$APP_BINARY" > "$ENTITLEMENTS.xml" 2>/dev/null
+	codesign -d --entitlements - "$APPDIR/$APP_BINARY" > "$ENTITLEMENTS" 2>/dev/null
 	if [ "$?" != "0" ]; then
 		error "Failed to get entitlements for $APPDIR/$APP_BINARY"
 	fi
-	for ent in `grep -a '<key>' "$ENTITLEMENTS.xml"`; do
+	for ent in `grep -a '<key>' "$ENTITLEMENTS"`; do
 		entitlement=`echo $ent | cut -f2 -d\> | cut -f1 -d\<`
 		case $entitlement in
 			com.apple.developer.networking.vpn.api)
@@ -113,7 +115,7 @@ INFO
 				;;
 			com.apple.security.application-groups)
 				echo ">>> App Groups:"
-				for group in `dd if="$ENTITLEMENTS.xml" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do
+				for group in `dd if="$ENTITLEMENTS" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do
 					GROUP_ID=`echo $group | cut -f2 -d\> | cut -f1 -d\<`-patched
 					echo "    $GROUP_ID"
 				done
@@ -133,7 +135,7 @@ INFO
 				echo ">>> Data Protection"
 				;;
 		esac
-	done | tee "$ENTITLEMENTS.txt"
+	done
 	cat <<INFO2
 
 5. Add a new Provisioning Profile
@@ -148,10 +150,10 @@ INFO
 ==================================================================
 = Installing the provisioning profile on your device using Xcode =
 ==================================================================
-	a. In Xcode goto Window / Devices
-	b. Right-click on your device and choose "Show Provisioning Profiles"
-	c. Click the + sign to install your new profile. You'll be asked to 
-	   browse to the .mobileprovision file.
+1. In Xcode goto Window / Devices
+2. Right-click on your device and choose "Show Provisioning Profiles"
+3. Click the + sign to install your new profile. You'll be asked to 
+   browse to the .mobileprovision file.
 
 ==============================
 = Installing the patched app =
@@ -162,30 +164,12 @@ INFO
 	      once per patched application.
 2. Run "make ipa deploy [PROFILE=<mobileprovision | bundle.id>]" to patch and install the .ipa
 	Note: If you omit the profile, the script will try to use Xcode's iOS Wildcard App ID
-	Do the following only if the "deploy" part didn't work
-		a. In Xcode goto Window / Devices
-		b. Under "Installed Apps" click the + button
-		c. Choose the patched .ipa file and cross your fingers
-		d. The patched app should appear on your device.
-
-Bundle ID: $BUNDLE_ID
-Required Entitlements: 
+3. Do the following only if the "deploy" part didn't work
+	a. In Xcode goto Window / Devices
+	b. Under "Installed Apps" click the + button
+	c. Choose the patched .ipa file and cross your fingers
+	d. The patched app should appear on your device.
 INFO2
-	cat "$ENTITLEMENTS.txt"
-	exit 0
-
-	loop=0
-	for group in `dd if="$ENTITLEMENTS.xml" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do #|tail -1` #|cut -f2 -d\>|cut -f1 -d\<`
-		GROUP_ID=`echo $group | cut -f2 -d\> | cut -f1 -d\<`-patched
-		if [ $loop == 0 ]; then
-			echo -n "App Groups: "
-		else
-			echo -n "            "
-		fi
-		echo $GROUP_ID
-		loop=1
-	done
-	exit 0
 }
 
 #
@@ -250,23 +234,23 @@ function ipa_patch {
 
 	# generate the correct entitlements
 	log 5 "Generating entitlements"
-	cat <<XML > "$ENTITLEMENTS.xml"
+	cat <<XML > "$ENTITLEMENTS"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 XML
-	strings "$MOBILEPROVISION" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d' >> "$ENTITLEMENTS.xml"
-	echo "</dict></plist>" >> "$ENTITLEMENTS.xml"
+	strings "$MOBILEPROVISION" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d' >> "$ENTITLEMENTS"
+	echo "</dict></plist>" >> "$ENTITLEMENTS"
 
 	# Make sure to sign any Plugins in the app. Do NOT attempt to optimize this, the order is important!
 	if [ -d "$APPDIR/PlugIns" ]; then
 		log 3 "Codesigning plugins"
 	fi
 	for file in `ls -1 "$APPDIR"/PlugIns/com.*/com.* 2>/dev/null`; do
-		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
+		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS" $file >/dev/null 2>&1
 	done
 	for file in `ls -d1 "$APPDIR"/PlugIns/com.* 2>/dev/null`; do
-		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
+		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS" $file >/dev/null 2>&1
 	done
 
 	# re-sign Frameworks, too
@@ -274,13 +258,13 @@ XML
 		log 3 "Codesigning frameworks"
 	fi
 	for file in `ls -1 "$APPDIR"/Frameworks/* 2>/dev/null`; do
-		codesign -fs "$CODESIGN_NAME" --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
+		codesign -fs "$CODESIGN_NAME" --entitlements "$ENTITLEMENTS" $file >/dev/null 2>&1
 	done
 
 	# re-sign the .app
 	log 3 "Codesigning $APP"
 	cd "$STAGING_DIR/Payload"
-	codesign -fs "$CODESIGN_NAME" --deep --entitlements "../../$ENTITLEMENTS.xml" $APP >/dev/null 2>&1
+	codesign -fs "$CODESIGN_NAME" --deep --entitlements "../../$ENTITLEMENTS" $APP >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		error "Failed to sign $APP with entitlements. You're on your own, sorry."
 	fi
@@ -299,8 +283,7 @@ XML
 	if [ "$?" != "0" ]; then
 		error "Failed to move .ipa file into $PACKAGES_DIR."
 	fi
-	success "Wrote \"$IPA_PATCHED\""
-	success "Great success!"
+	success "Wrote $IPA_PATCHED"
 	cd - >/dev/null 2>&1
 }
 
@@ -336,6 +319,3 @@ case $COMMAND in
 		exit 1
 		;;
 esac
-	
-# success!
-exit 0
