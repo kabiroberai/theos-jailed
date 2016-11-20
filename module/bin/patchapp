@@ -18,9 +18,10 @@ DYLIB=$4
 USE_CYCRIPT=$5
 
 function begin { printf "\e[1;31m> \e[1;3;39m$1…\e[m\n"; }
-function log { printf "\e[0;3$1m==> \e[1;39m$2…\e[m\n"; }
+function log_raw { printf "\e[0;3$1m==> \e[1;39m$2\e[m\n"; }
+function log { log_raw "$1" "$2…"; }
+function success { log_raw 6 "$1"; }
 function error { printf "\e[0;31m==> \e[1;31mError:\e[m $1\n"; exit 1; }
-INDENT="     "
 
 #
 # Setup all the things.
@@ -295,8 +296,8 @@ XML
 	if [ "$?" != "0" ]; then
 		error "Failed to move .ipa file into $PACKAGES_DIR."
 	fi
-	log 6 "Wrote \"$IPA_PATCHED\""
-	log 6 "Great success!"
+	success "Wrote \"$IPA_PATCHED\""
+	success "Great success!"
 	cd - >/dev/null 2>&1
 }
 
