@@ -307,12 +307,13 @@ XML
 	# re-pack the .ipa
 	log "Repacking the .ipa"
 	IPA_PATCHED="${IPA%*.ipa}-patched.ipa"
-	rm -f "$IPA_PATCHED" >/dev/null 2>&1
+	IPA_PATCHED="${IPA_PATCHED##*/}"
 	zip -9r "$IPA_PATCHED" Payload/ >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		error "Failed to compress the app into a .ipa file."
 	fi
 	mkdir -p "../$PACKAGES_DIR"
+	rm -f "../$PACKAGES_DIR/$IPA_PATCHED" >/dev/null 2>&1
 	mv "$IPA_PATCHED" "../$PACKAGES_DIR/"
 	if [ "$?" != "0" ]; then
 		error "Failed to move .ipa file into $PACKAGES_DIR."
