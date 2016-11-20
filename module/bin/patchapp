@@ -54,7 +54,7 @@ function setup_environment {
 		error "Couldn't change into Payload folder. Wat."
 	fi
 	APP=`pwd`
-	APP=${APP##*/}
+	APP="`basename "$APP"`"
 	APPDIR=$STAGING_DIR/Payload/$APP
 	cd "$ROOT_DIR"
 	BUNDLE_ID=`defaults read $(pwd)/$APPDIR/Info.plist CFBundleIdentifier`-patched
@@ -121,10 +121,10 @@ INFO
 				;;
 			com.apple.security.application-groups)
 				echo ">>> App Groups:"
-				for group in `dd if="$ENTITLEMENTS.xml" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do #|tail -n1` #|cut -f2 -d\>|cut -f1 -d\<`
+				for group in `dd if="$ENTITLEMENTS.xml" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do
 					GROUP_ID=`echo $group | cut -f2 -d\> | cut -f1 -d\<`-patched
 					echo "    $GROUP_ID"
-				done			
+				done
 				;;
 			com.apple.developer.associated-domains)
 				echo ">>> Associated Domains"
@@ -191,7 +191,7 @@ INFO2
 	exit 0
 
 	loop=0
-	for group in `dd if="$ENTITLEMENTS.xml" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do #|tail -n1` #|cut -f2 -d\>|cut -f1 -d\<`
+	for group in `dd if="$ENTITLEMENTS.xml" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do #|tail -1` #|cut -f2 -d\>|cut -f1 -d\<`
 		GROUP_ID=`echo $group | cut -f2 -d\> | cut -f1 -d\<`-patched
 		if [ $loop == 0 ]; then
 			echo -n "App Groups: "
@@ -215,7 +215,7 @@ function ipa_patch {
 	if [ ! -r "$MOBILEPROVISION" ]; then
 		# MOBILEPROVISION may be a bundle id / wildcard, try finding a provisioning profile that matches it
 		[ -z "$MOBILEPROVISION" ] && SEARCH="Xcode iOS Wildcard App ID" || SEARCH="[^.]*\.$MOBILEPROVISION"
-		BUNDLEPROVISION="$(grep -l "<string>$SEARCH<\/string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -n1)"
+		BUNDLEPROVISION="`grep -l "<string>$SEARCH<\/string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1`"
 
 		if [ ! -r "$BUNDLEPROVISION" ]; then # BUNDLEPROVISION can't be read
 			error "Can't read '$MOBILEPROVISION'"
@@ -237,13 +237,13 @@ function ipa_patch {
 	# copy the files into the .app folder
 	log "Copying .dylib dependencies into \"$APPDIR\""
 	cp "$DYLIB" "$APPDIR"
-	CODESIGN_FILES=("${DYLIB##*/}")
-	INJECT_FILES=("${DYLIB##*/}")
+	CODESIGN_FILES=("`basename "$DYLIB"`")
+	INJECT_FILES=("`basename "$DYLIB"`")
 
 	if [ "$USE_CYCRIPT" = "1" ]; then
 		cp "$CYCRIPT" "$APPDIR"
-		CODESIGN_FILES+=("${CYCRIPT##*/}")
-		INJECT_FILES+=("${CYCRIPT##*/}")
+		CODESIGN_FILES+=("`basename "$CYCRIPT"`")
+		INJECT_FILES+=("`basename "$CYCRIPT"`")
 	fi
 
 	# sign all of the .dylib files we're injecting into the app
@@ -306,8 +306,7 @@ XML
 	
 	# re-pack the .ipa
 	log "Repacking the .ipa"
-	IPA_PATCHED="${IPA%*.ipa}-patched.ipa"
-	IPA_PATCHED="${IPA_PATCHED##*/}"
+	IPA_PATCHED="`basename "${IPA%*.ipa}-patched.ipa"`"
 	zip -9r "$IPA_PATCHED" Payload/ >/dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		error "Failed to compress the app into a .ipa file."
