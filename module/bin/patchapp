@@ -196,12 +196,9 @@ function ipa_patch {
 
 	# https://github.com/dado3212/SnapchatReloaded/blob/master/patchapp.sh
 	if [ ! -r "$MOBILEPROVISION" ]; then
-		# MOBILEPROVISION may be a bundle id / wildcard, try finding a provisioning profile that matches it
-		[ -z "$MOBILEPROVISION" ] && SEARCH="Xcode iOS Wildcard App ID" || SEARCH="[^.]*\.$MOBILEPROVISION"
-		BUNDLEPROVISION="`grep -l "<string>$SEARCH<\/string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1`"
-
-		if [ ! -r "$BUNDLEPROVISION" ]; then # BUNDLEPROVISION can't be read
-			error "Can't read '$MOBILEPROVISION'"
+		BUNDLEPROVISION="`grep -Fl "<string>iOS Team Provisioning Profile: $MOBILEPROVISION</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1`"
+		if [ ! -r "$BUNDLEPROVISION" ]; then
+			error "Couldn't find profile for '$MOBILEPROVISION'"
 		fi
 
 		MOBILEPROVISION="$BUNDLEPROVISION"
