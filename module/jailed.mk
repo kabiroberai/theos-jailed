@@ -14,8 +14,8 @@ PROFILE ?= *
 _THEOS_USE_CYCRIPT := $(call __theos_bool,$(USE_CYCRIPT))
 
 ifeq ($(call __theos_bool,$(USE_FISHHOOK)),$(_THEOS_TRUE))
-$(TWEAK_NAME)_FILES += $(THEOS_MODULE_PATH)/jailed/fishhook/fishhook.c
-$(TWEAK_NAME)_CFLAGS += -I$(THEOS_MODULE_PATH)/jailed/fishhook
+$(TWEAK_NAME)_FILES += $(THEOS_MODULE_PATH)/jailed/lib/fishhook/fishhook.c
+$(TWEAK_NAME)_CFLAGS += -I$(THEOS_MODULE_PATH)/jailed/lib/fishhook
 endif
 
 include $(THEOS_MAKE_PATH)/tweak.mk
