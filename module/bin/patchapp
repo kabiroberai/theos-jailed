@@ -260,7 +260,9 @@ XML
 	echo "</dict></plist>" >> "$ENTITLEMENTS.xml"
 
 	# Make sure to sign any Plugins in the app. Do NOT attempt to optimize this, the order is important!
-	log 3 "Codesigning Plugins and Frameworks"
+	if [ -d "$APPDIR/PlugIns" ]; then
+		log 3 "Codesigning plugins"
+	fi
 	for file in `ls -1 $APPDIR/PlugIns/com.*/com.* 2>/dev/null`; do
 		codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
 	done
@@ -269,6 +271,9 @@ XML
 	done
 
 	# re-sign Frameworks, too
+	if [ -d "$APPDIR/Frameworks" ]; then
+		log 3 "Codesigning frameworks"
+	fi
 	for file in `ls -1 $APPDIR/Frameworks/* 2>/dev/null`; do
 		codesign -fs "$CODESIGN_NAME" --entitlements "$ENTITLEMENTS.xml" $file >/dev/null 2>&1
 	done
