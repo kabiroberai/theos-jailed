@@ -79,15 +79,6 @@ function ipa_info {
 4. An .ipa file that's already been decrypted using Clutch
    Note: Encrypted apps WILL NOT work. Don't bother trying. Use Clutch.
 
-==================
-= What to do now =
-==================
-1. Create a provisioning profile for this app (run "make info" for help)
-2. Run "make ipa deploy PROFILE=<profile>" to patch and install the .ipa, replacing <profile> with:
-   	A .mobileprovision file
-   	A bundle id
-   	Or leave it blank to use a wildcard profile
-
 =====================================
 = Creating the provisioning profile =
 =====================================
@@ -168,21 +159,13 @@ INFO
 	Note: You can't install over the top of the real application,
 	      so it must be deleted first. This only needs to be done
 	      once per patched application.
-2. Run "make ipa deploy PROFILE=[file.mobileprovision | your.bundle.id]" as described above
-3. If "make ipa deploy" didn't work for whatever reason, 
-   just run "make ipa", and do the following
-	a. In Xcode goto Window / Devices
-	b. Under "Installed Apps" click the + button
-	c. Browse to the patched .ipa file and cross your fingers
-	d. The patched app should appear on your device.
-
-===========
-= Summary =
-===========
-Do all of the things mentioned under "What to do now", above.
-Make sure that the provisioning profile contains the correct entitlements (see above).
-Once you have installed the provisioning profile on your device, run the following command:
-    make ipa install PROFILE=[file.mobileprovision | your.bundle.id]
+2. Run "make ipa deploy [PROFILE=<mobileprovision | bundle.id>]" to patch and install the .ipa
+	Note: If you omit the profile, the script will try to use Xcode's iOS Wildcard App ID
+	Do the following only if the "deploy" part didn't work
+		a. In Xcode goto Window / Devices
+		b. Under "Installed Apps" click the + button
+		c. Choose the patched .ipa file and cross your fingers
+		d. The patched app should appear on your device.
 
 Bundle ID: $BUNDLE_ID
 Required Entitlements: 
