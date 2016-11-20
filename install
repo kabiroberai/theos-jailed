@@ -6,10 +6,9 @@ function error { echo "[error] $1" >&2; exit 1; }
 function info { echo "[info] $1"; }
 
 # Modify these to specify a custom install path
-THEOS_DEFAULT_PATH="$THEOS"
+THEOS_PATH="$THEOS"
 TEMPLATE_DIR="kabiroberai"
 
-THEOS_PATH="${1:-$THEOS_DEFAULT_PATH}" # $1 overrides THEOS_DEFAULT_PATH
 MODULE_PATH="$THEOS_PATH/mod/jailed/"
 TEMPLATE_PATH="$THEOS_PATH/templates/ios/$TEMPLATE_DIR/"
 
