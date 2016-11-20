@@ -3,7 +3,7 @@
 #
 # Config
 #
-LIB="`dirname "$0"`/../lib"
+LIB="$THEOS_JAILED_PATH/lib"
 CYCRIPT="$LIB/Cycript.dylib"
 DEV_CERT_NAME="iPhone Developer"
 ENTITLEMENTS=".entitlements.xml"

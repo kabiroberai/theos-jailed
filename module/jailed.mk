@@ -1,5 +1,5 @@
 # Set THEOS_JAILED_PATH to the current directory
-THEOS_JAILED_PATH = $(THEOS_MODULE_PATH)/jailed
+export THEOS_JAILED_PATH = $(THEOS_MODULE_PATH)/jailed
 
 # Disable codesigning (we'll sign the dylib later)
 TARGET_CODESIGN =
