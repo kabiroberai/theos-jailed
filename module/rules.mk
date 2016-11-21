@@ -1,15 +1,16 @@
-.PHONY: ipa info deploy lldb
+.PHONY: ipa info deploy
 
-PATCHAPP = $(THEOS_JAILED_PATH)/bin/patchapp
+ifeq ($(call __theos_bool,$(LLDB)),$(_THEOS_TRUE))
+THEOS_DEPLOY_FLAG = d
+else
+THEOS_DEPLOY_FLAG = L
+endif
 
 ipa: all
-	$(ECHO_NOTHING)$(PATCHAPP) patch$(ECHO_END)
+	$(ECHO_NOTHING)$(THEOS_JAILED_BIN)/ipa$(ECHO_END)
 
 info:
-	$(ECHO_NOTHING)$(PATCHAPP) info$(ECHO_END)
+	$(ECHO_NOTHING)$(THEOS_JAILED_BIN)/info$(ECHO_END)
 
 deploy:
-	$(ECHO_NOTHING)$(PATCHAPP) install$(ECHO_END)
-
-lldb:
-	$(ECHO_NOTHING)$(PATCHAPP) debug$(ECHO_END)
+	$(ECHO_NOTHING)ios-deploy -$(THEOS_DEPLOY_FLAG)Wb "$(STAGING_DIR)"/Payload/*.app$(ECHO_END)
