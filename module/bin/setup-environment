@@ -2,12 +2,7 @@
 
 source "$MESSAGES" "$1"
 
-realpath() {
-    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
-
-ROOT_DIR="`pwd`"
-
+ROOT_DIR="$PWD"
 CODESIGN_NAME=`security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\"`
 
 if [ "$?" != "0" ]; then
@@ -18,13 +13,11 @@ if [ ! -r "$IPA" ]; then
 	error "\"$IPA\" not found or not readable"
 fi
 
-# setup
 rm -rf "$STAGING_DIR" >/dev/null 2>&1
 mkdir -p "$STAGING_DIR"
 
-# uncompress the IPA into STAGING_DIR
 log 1 "Unpacking `basename "$IPA"`"
-unzip -o -d "$STAGING_DIR" "$IPA" >/dev/null 2>&1
+unzip -d "$STAGING_DIR" "$IPA" >/dev/null 2>&1
 if [ "$?" != "0" ]; then
 	error "Failed to unzip \"$IPA\""
 fi
@@ -32,10 +25,10 @@ fi
 cd "$STAGING_DIR"
 cd Payload/*.app
 if [ "$?" != "0" ]; then
-	error "Couldn't change into Payload folder. Wat."
+	error "\"$IPA\" does not have a payload"
 fi
-APP="`basename "$(pwd)"`"
+APP="`basename "$PWD"`"
 APPDIR="$STAGING_DIR/Payload/$APP"
 cd "$ROOT_DIR"
-BUNDLE_ID="`defaults read "$(realpath "$APPDIR/Info.plist")" CFBundleIdentifier`-patched"
-APP_BINARY="`defaults read "$(realpath "$APPDIR/Info.plist")" CFBundleExecutable`"
+BUNDLE_ID="`defaults read "$APPDIR/Info.plist" CFBundleIdentifier`-patched"
+APP_BINARY="`defaults read "$APPDIR/Info.plist" CFBundleExecutable`"

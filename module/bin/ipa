@@ -8,7 +8,6 @@ if [ ! -r "$PROFILE" ]; then
 	if [ ! -r "$BUNDLEPROFILE" ]; then
 		error "Failed to find profile for '$PROFILE'"
 	fi
-
 	PROFILE="$BUNDLEPROFILE"
 fi
 
@@ -104,4 +103,3 @@ if [ "$?" != "0" ]; then
 	error "Failed to move .ipa file into $PACKAGES_DIR."
 fi
 success "Wrote $IPA_PATCHED"
-cd - >/dev/null 2>&1
