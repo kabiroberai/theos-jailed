@@ -18,8 +18,9 @@ export ENTITLEMENTS ?= .entitlements.xml
 export PROFILE ?= *
 
 # Cycript
-export CYCRIPT ?= $(THEOS_JAILED_PATH)/lib/Cycript.dylib
+USE_CYCRIPT ?= $(DEBUG)
 export USE_CYCRIPT := $(call __theos_bool,$(USE_CYCRIPT))
+export CYCRIPT ?= $(THEOS_JAILED_PATH)/lib/Cycript.dylib
 
 # Miscellaneous
 export TWEAK_NAME
