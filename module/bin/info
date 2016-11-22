@@ -2,8 +2,6 @@
 
 source "$SETUP_ENVIRONMENT" "Generating info for `basename "$IPA"`"
 
-ENT_LIST=()
-
 codesign -d --entitlements - "$APPDIR/$APP_BINARY" > "$ENTITLEMENTS" 2>/dev/null
 if [ "$?" != "0" ]; then
 	error "Failed to get entitlements for $APPDIR/$APP_BINARY"
@@ -47,10 +45,8 @@ for ENT in `grep -a '<key>' "$ENTITLEMENTS"`; do
 			NEXT=">>> Data Protection"
 			;;
 	esac
-	ENT_LIST+=("$NEXT")
+	[ -n "$NEXT" ] && ENT_LIST="$ENT_LIST"$'\n'"$NEXT"
 done
-
-ENT_LIST=`printf '%s\n' "${ENT_LIST[@]}"`
 
 eval "less <<EOF
 $(<$INFO_TEMPLATE)" 2> /dev/null
