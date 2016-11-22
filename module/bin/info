@@ -2,102 +2,55 @@
 
 source "$SETUP_ENVIRONMENT" "Generating info for `basename "$IPA"`"
 
-cat <<INFO
+ENT_LIST=()
 
-=================
-= Prerequisites =
-=================
-1. Patience and luck
-2. Xcode and iPhone SDK
-3. iOS Developer Account with Apple
-4. An .ipa file that's already been decrypted using Clutch
-   Note: Encrypted apps WILL NOT work. Don't bother trying. Use Clutch.
+codesign -d --entitlements - "$APPDIR/$APP_BINARY" > "$ENTITLEMENTS" 2>/dev/null
+if [ "$?" != "0" ]; then
+	error "Failed to get entitlements for $APPDIR/$APP_BINARY"
+fi
 
-=====================================
-= Creating the provisioning profile =
-=====================================
-1. Sign into the Apple Member Center: 
-		https://developer.apple.com/membercenter/index.action
-2. Choose "Certificates, Identifiers & Profiles"
-3. From "iOS Apps" choose "Identifiers"
-4. Add a new App ID with the following information:
-	a. For "Explicit App ID" / "Bundle ID" use: $BUNDLE_ID
-	b. Under "App Services" enable the following services:
+for ENT in `grep -a '<key>' "$ENTITLEMENTS"`; do
+	ENTITLEMENT=`echo $ENT | cut -f2 -d\> | cut -f1 -d\<`
+	NEXT=""
+	case $ENTITLEMENT in
+		com.apple.developer.networking.vpn.api)
+			NEXT=">>> VPN Configuration & Control"
+			;;
+		com.apple.developer.in-app-payments)
+			NEXT=">>> Apple Pay (requires extra configuration)"
+			;;
+		com.apple.external-accessory.wireless-configuration)
+			NEXT=">>> Wireless Accessory Configuration"
+			;;
+		com.apple.developer.homekit)
+			NEXT=">>> HomeKit"
+			;;
+		com.apple.security.application-groups)
+			NEXT=">>> App Groups:"
+			for GROUP in `dd if="$ENTITLEMENTS" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do
+				GROUP_ID=`echo $GROUP | cut -f2 -d\> | cut -f1 -d\<`-patched
+				NEXT="$NEXT"$'\n'"    $GROUP_ID"
+			done
+			;;
+		com.apple.developer.associated-domains)
+			NEXT=">>> Associated Domains"
+			;;
+		com.apple.developer.healthkit)
+			NEXT=">>> HealthKit"
+			;;
+		inter-app-audio)
+			NEXT=">>> Inter-App Audio"
+			;;
+		com.apple.developer.ubiquity*)
+			NEXT=">>> Passbook"
+			NEXT=">>> iCloud (requires extra configuration)"
+			NEXT=">>> Data Protection"
+			;;
+	esac
+	ENT_LIST+=("$NEXT")
+done
 
-INFO
-	codesign -d --entitlements - "$APPDIR/$APP_BINARY" > "$ENTITLEMENTS" 2>/dev/null
-	if [ "$?" != "0" ]; then
-		error "Failed to get entitlements for $APPDIR/$APP_BINARY"
-	fi
-	for ent in `grep -a '<key>' "$ENTITLEMENTS"`; do
-		entitlement=`echo $ent | cut -f2 -d\> | cut -f1 -d\<`
-		case $entitlement in
-			com.apple.developer.networking.vpn.api)
-				echo ">>> VPN Configuration & Control"
-				;;
-			com.apple.developer.in-app-payments)
-				echo ">>> Apple Pay (requires extra configuration)"
-				;;
-			com.apple.external-accessory.wireless-configuration)
-				echo ">>> Wireless Accessory Configuration"
-				;;
-			com.apple.developer.homekit)
-				echo ">>> HomeKit"
-				;;
-			com.apple.security.application-groups)
-				echo ">>> App Groups:"
-				for group in `dd if="$ENTITLEMENTS" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do
-					GROUP_ID=`echo $group | cut -f2 -d\> | cut -f1 -d\<`-patched
-					echo "    $GROUP_ID"
-				done
-				;;
-			com.apple.developer.associated-domains)
-				echo ">>> Associated Domains"
-				;;
-			com.apple.developer.healthkit)
-				echo ">>> HealthKit"
-				;;
-			inter-app-audio)
-				echo ">>> Inter-App Audio"
-				;;
-			com.apple.developer.ubiquity*)
-				echo ">>> Passbook"
-				echo ">>> iCloud (requires extra configuration)"
-				echo ">>> Data Protection"
-				;;
-		esac
-	done
-	cat <<INFO2
+ENT_LIST=`printf '%s\n' "${ENT_LIST[@]}"`
 
-5. Add a new Provisioning Profile
-	a. For "type of provisioning profile" choose "iOS App Development"
-	b. For "App ID" choose "$BUNDLE_ID"
-	c. Choose the development cert you want associate with this profile (or "select All")
-	d. "Select All" devices unless you want to choose a specific device
-	e. Give the profile a name, anything will do.
-6. Download the provisioning profile (.mobileprovision file) from the Member Center
-	a. Take note of the path/filename to which the .mobileprovision file is saved.
-
-==================================================================
-= Installing the provisioning profile on your device using Xcode =
-==================================================================
-1. In Xcode goto Window / Devices
-2. Right-click on your device and choose "Show Provisioning Profiles"
-3. Click the + sign to install your new profile. You'll be asked to 
-   browse to the .mobileprovision file.
-
-==============================
-= Installing the patched app =
-==============================
-1. Delete any existing copies of the app from your device. 
-	Note: You can't install over the top of the real application,
-	      so it must be deleted first. This only needs to be done
-	      once per patched application.
-2. Run "make ipa deploy [PROFILE=<mobileprovision | bundle.id>]" to patch and install the .ipa
-	Note: If you omit the profile, the script will try to use Xcode's iOS Wildcard App ID
-3. Do the following only if the "deploy" part didn't work
-	a. In Xcode goto Window / Devices
-	b. Under "Installed Apps" click the + button
-	c. Choose the patched .ipa file and cross your fingers
-	d. The patched app should appear on your device.
-INFO2
+eval "less <<EOF
+$(<$INFO_TEMPLATE)" 2> /dev/null

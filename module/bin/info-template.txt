@@ -1,0 +1,52 @@
+=================
+= Prerequisites =
+=================
+1. Patience and luck
+2. Xcode and iPhone SDK
+3. iOS Developer Account with Apple
+4. An .ipa file that's already been decrypted using Clutch
+	Note: Encrypted apps WILL NOT work. Don't bother trying. Use Clutch.
+
+=====================================
+= Creating the provisioning profile =
+=====================================
+1. Sign into the Apple Member Center: 
+		https://developer.apple.com/membercenter/index.action
+2. Choose "Certificates, Identifiers & Profiles"
+3. From "iOS Apps" choose "Identifiers"
+4. Add a new App ID with the following information:
+	a. For "Explicit App ID" / "Bundle ID" use: $BUNDLE_ID
+	b. Under "App Services" enable the following services:
+$ENT_LIST
+
+5. Add a new Provisioning Profile
+	a. For "type of provisioning profile" choose "iOS App Development"
+	b. For "App ID" choose "$BUNDLE_ID"
+	c. Choose the development cert you want associate with this profile (or "select All")
+	d. "Select All" devices unless you want to choose a specific device
+	e. Give the profile a name, anything will do.
+6. Download the provisioning profile (.mobileprovision file) from the Member Center
+	a. Take note of the path/filename to which the .mobileprovision file is saved.
+
+==================================================================
+= Installing the provisioning profile on your device using Xcode =
+==================================================================
+1. In Xcode goto Window / Devices
+2. Right-click on your device and choose "Show Provisioning Profiles"
+3. Click the + sign to install your new profile. You'll be asked to 
+   browse to the .mobileprovision file.
+
+==============================
+= Installing the patched app =
+==============================
+1. Delete any existing copies of the app from your device. 
+	Note: You can't install over the top of the real application,
+	      so it must be deleted first. This only needs to be done
+	      once per patched application.
+2. Run "make ipa deploy [PROFILE=<mobileprovision | bundle.id>]" to patch and install the .ipa
+	Note: If you omit the profile, the script will try to use Xcode's iOS Wildcard App ID
+3. Do the following only if the "deploy" part didn't work
+	a. In Xcode goto Window / Devices
+	b. Under "Installed Apps" click the + button
+	c. Choose the patched .ipa file and cross your fingers
+	d. The patched app should appear on your device.

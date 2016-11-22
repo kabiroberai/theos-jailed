@@ -2,6 +2,7 @@
 THEOS_JAILED_BIN = $(THEOS_JAILED_PATH)/bin
 export MESSAGES = $(THEOS_JAILED_BIN)/messages
 export SETUP_ENVIRONMENT = $(THEOS_JAILED_BIN)/setup-environment
+export INFO_TEMPLATE = $(THEOS_JAILED_BIN)/info-template.txt
 
 # Directories
 export RESOURCES_DIR ?= Resources

@@ -59,10 +59,10 @@ cat <<XML > "$ENTITLEMENTS"
 <plist version="1.0">
 XML
 strings "$PROFILE" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d' >> "$ENTITLEMENTS"
-cat <<XML >> "$ENTITLEMENTS"
+cat <<XML2 >> "$ENTITLEMENTS"
 </dict>
 </plist>
-XML
+XML2
 
 # Make sure to sign any Plugins in the app. Do NOT attempt to optimize this, the order is important!
 if [ -d "$APPDIR/PlugIns" ]; then
