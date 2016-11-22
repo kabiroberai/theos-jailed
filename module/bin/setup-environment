@@ -2,7 +2,6 @@
 
 source "$MESSAGES" "$1"
 
-ROOT_DIR="$PWD"
 CODESIGN_NAME=`security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\"`
 
 if [ "$?" != "0" ]; then
@@ -22,13 +21,11 @@ if [ "$?" != "0" ]; then
 	error "Failed to unzip \"$IPA\""
 fi
 
-cd "$STAGING_DIR"
-cd Payload/*.app
-if [ "$?" != "0" ]; then
-	error "\"$IPA\" does not have a payload"
-fi
-APP="`basename "$PWD"`"
+APP="`basename "$STAGING_DIR"/Payload/*.app`"
 APPDIR="$STAGING_DIR/Payload/$APP"
-cd "$ROOT_DIR"
+if [ ! -d "$APPDIR" ]; then
+	error "\"$IPA\" does not contain an application"
+fi
+
 BUNDLE_ID="`defaults read "$APPDIR/Info.plist" CFBundleIdentifier`-patched"
 APP_BINARY="`defaults read "$APPDIR/Info.plist" CFBundleExecutable`"

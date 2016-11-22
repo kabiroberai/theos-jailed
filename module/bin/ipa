@@ -46,7 +46,7 @@ for file in "${INJECT_FILES[@]}"; do
 	log 4 "Injecting $file"
 	optool install -c load -p "@executable_path/$file" -t $APPDIR/$APP_BINARY >& /dev/null
 	if [ "$?" != "0" ]; then
-		error "Failed to inject $file into $APPDIR/$APP_BINARY. Can I interest you in debugging the problem?"
+		error "Failed to inject $file into $APP. Can I interest you in debugging the problem?"
 	fi
 done
 chmod +x "$APPDIR/$APP_BINARY"
@@ -59,7 +59,10 @@ cat <<XML > "$ENTITLEMENTS"
 <plist version="1.0">
 XML
 strings "$PROFILE" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d' >> "$ENTITLEMENTS"
-echo "</dict></plist>" >> "$ENTITLEMENTS"
+cat <<XML >> "$ENTITLEMENTS"
+</dict>
+</plist>
+XML
 
 # Make sure to sign any Plugins in the app. Do NOT attempt to optimize this, the order is important!
 if [ -d "$APPDIR/PlugIns" ]; then
@@ -83,9 +86,9 @@ done
 # re-sign the .app
 log 3 "Codesigning $APP"
 cd "$STAGING_DIR/Payload"
-codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ROOT_DIR/$ENTITLEMENTS" $APP >/dev/null 2>&1
+codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS" $APP 2>/dev/null
 if [ "$?" != "0" ]; then
-	error "Failed to sign $APP with entitlements. You're on your own, sorry."
+	error "Failed to sign $APP with entitlements $ENTITLEMENTS"
 fi
 cd "$STAGING_DIR"
 
@@ -96,9 +99,9 @@ zip -9r "$IPA_PATCHED" Payload/ >/dev/null 2>&1
 if [ "$?" != "0" ]; then
 	error "Failed to compress the app into a .ipa file."
 fi
-mkdir -p "$ROOT_DIR/$PACKAGES_DIR"
-rm -f "$ROOT_DIR/$PACKAGES_DIR/$IPA_PATCHED" >/dev/null 2>&1
-mv "$IPA_PATCHED" "$ROOT_DIR/$PACKAGES_DIR/"
+mkdir -p "$PACKAGES_DIR"
+rm -f "$PACKAGES_DIR/$IPA_PATCHED" >/dev/null 2>&1
+mv "$IPA_PATCHED" "$PACKAGES_DIR/"
 if [ "$?" != "0" ]; then
 	error "Failed to move .ipa file into $PACKAGES_DIR."
 fi

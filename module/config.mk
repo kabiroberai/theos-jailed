@@ -6,7 +6,7 @@ export SETUP_ENVIRONMENT = $(THEOS_JAILED_BIN)/setup-environment
 # Directories
 export RESOURCES_DIR ?= Resources
 export STAGING_DIR = $(_THEOS_LOCAL_DATA_DIR)/jailed
-export PACKAGES_DIR = $(THEOS_PACKAGE_DIR_NAME)
+export PACKAGES_DIR = $(THEOS_PROJECT_DIR)/$(THEOS_PACKAGE_DIR_NAME)
 
 # Resources
 export IPA ?= $($(TWEAK_NAME)_IPA)
@@ -14,7 +14,7 @@ export DYLIB ?= $(THEOS_OBJ_DIR)/$(TWEAK_NAME).dylib
 
 # Codesigning
 export DEV_CERT_NAME ?= iPhone Developer
-export ENTITLEMENTS ?= .entitlements.xml
+export ENTITLEMENTS ?= $(STAGING_DIR)/entitlements.xml
 export PROFILE ?= *
 
 # Cycript
