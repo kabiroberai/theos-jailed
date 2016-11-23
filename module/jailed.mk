@@ -4,8 +4,8 @@ export THEOS_JAILED_PATH = $(THEOS_MODULE_PATH)/jailed
 # Disable codesigning (we'll sign the dylib later)
 TARGET_CODESIGN =
 
-# Use the internal generator instead of CydiaSubstrate
-_THEOS_TARGET_DEFAULT_USE_SUBSTRATE := 0
+# Add jailed/lib to THEOS_LIBRARY_PATH to override stub CydiaSubstrate
+THEOS_LIBRARY_PATH += -F$(THEOS_MODULE_PATH)/jailed/lib
 
 # Use libc++ by default - for libstdc++ use LDFLAGS += -stdlib=libstdc++
 _THEOS_INTERNAL_LDFLAGS += -stdlib=libc++

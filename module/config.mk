@@ -23,5 +23,9 @@ USE_CYCRIPT ?= $(DEBUG)
 export USE_CYCRIPT := $(call __theos_bool,$(USE_CYCRIPT))
 export CYCRIPT ?= $(THEOS_JAILED_PATH)/lib/Cycript.dylib
 
+# CydiaSubstrate
+export USE_SUBSTRATE := $(call __theos_bool,$(or $($(TWEAK_NAME)_USE_SUBSTRATE),$(_THEOS_TARGET_DEFAULT_USE_SUBSTRATE),$(_THEOS_TRUE)))
+export SUBSTRATE ?= $(THEOS_JAILED_PATH)/lib/CydiaSubstrate.framework
+
 # Miscellaneous
 export TWEAK_NAME

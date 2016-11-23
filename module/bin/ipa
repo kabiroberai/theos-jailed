@@ -27,6 +27,11 @@ cp "$DYLIB" "$APPDIR"
 CODESIGN_FILES=("`basename "$DYLIB"`")
 INJECT_FILES=("`basename "$DYLIB"`")
 
+if [ "$USE_SUBSTRATE" = "1" ]; then
+	cp -a "$SUBSTRATE" "$APPDIR"
+	CODESIGN_FILES+=("`basename "$SUBSTRATE"`")
+fi
+
 if [ "$USE_CYCRIPT" = "1" ]; then
 	cp "$CYCRIPT" "$APPDIR"
 	CODESIGN_FILES+=("`basename "$CYCRIPT"`")
