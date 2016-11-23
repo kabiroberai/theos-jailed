@@ -1,5 +1,9 @@
-# Shell scripts
+# Module paths
+THEOS_JAILED_PATH = $(THEOS_MODULE_PATH)/jailed
 THEOS_JAILED_BIN = $(THEOS_JAILED_PATH)/bin
+THEOS_JAILED_LIB = $(THEOS_JAILED_PATH)/lib
+
+# Shell scripts
 export MESSAGES = $(THEOS_JAILED_BIN)/messages
 export SETUP_ENVIRONMENT = $(THEOS_JAILED_BIN)/setup-environment
 export INFO_TEMPLATE = $(THEOS_JAILED_BIN)/info-template.txt
@@ -21,11 +25,11 @@ export PROFILE ?= *
 # Cycript
 USE_CYCRIPT ?= $(DEBUG)
 export USE_CYCRIPT := $(call __theos_bool,$(USE_CYCRIPT))
-export CYCRIPT ?= $(THEOS_JAILED_PATH)/lib/Cycript.dylib
+export CYCRIPT ?= $(THEOS_JAILED_LIB)/Cycript.dylib
 
 # CydiaSubstrate
 export USE_SUBSTRATE := $(call __theos_bool,$(or $($(TWEAK_NAME)_USE_SUBSTRATE),$(_THEOS_TARGET_DEFAULT_USE_SUBSTRATE),$(_THEOS_TRUE)))
-export SUBSTRATE ?= $(THEOS_JAILED_PATH)/lib/CydiaSubstrate.framework
+export SUBSTRATE ?= $(THEOS_JAILED_LIB)/CydiaSubstrate.framework
 
 # Miscellaneous
 export TWEAK_NAME
