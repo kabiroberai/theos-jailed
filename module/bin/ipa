@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$SETUP_ENVIRONMENT" "Patchinig tweak $TWEAK_NAME"
+source "$INIT" "Patchinig tweak $TWEAK_NAME"
 
 # https://github.com/dado3212/SnapchatReloaded/blob/master/patchapp.sh
 if [ ! -r "$PROFILE" ]; then

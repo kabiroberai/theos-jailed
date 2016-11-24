@@ -5,7 +5,7 @@ THEOS_JAILED_LIB = $(THEOS_JAILED_PATH)/lib
 
 # Shell scripts
 export MESSAGES = $(THEOS_JAILED_BIN)/messages
-export SETUP_ENVIRONMENT = $(THEOS_JAILED_BIN)/setup-environment
+export INIT = $(THEOS_JAILED_BIN)/init
 export INFO_TEMPLATE = $(THEOS_JAILED_BIN)/info-template.txt
 
 # Directories
@@ -23,8 +23,7 @@ export ENTITLEMENTS ?= $(STAGING_DIR)/entitlements.xml
 export PROFILE ?= *
 
 # Cycript
-USE_CYCRIPT ?= $(DEBUG)
-export USE_CYCRIPT := $(call __theos_bool,$(USE_CYCRIPT))
+export USE_CYCRIPT := $(call __theos_bool,$(or $(USE_CYCRIPT),$(DEBUG)))
 export CYCRIPT ?= $(THEOS_JAILED_LIB)/Cycript.dylib
 
 # CydiaSubstrate
