@@ -69,18 +69,7 @@ cat <<XML2 >> "$ENTITLEMENTS"
 </plist>
 XML2
 
-# Make sure to sign any Plugins in the app. Do NOT attempt to optimize this, the order is important!
-if [ -d "$APPDIR/PlugIns" ]; then
-	log 3 "Codesigning plugins"
-fi
-for file in `ls -1 "$APPDIR"/PlugIns/com.*/com.* 2>/dev/null`; do
-	codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS" $file >/dev/null 2>&1
-done
-for file in `ls -d1 "$APPDIR"/PlugIns/com.* 2>/dev/null`; do
-	codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS" $file >/dev/null 2>&1
-done
-
-# re-sign Frameworks, too
+# re-sign Frameworks
 if [ -d "$APPDIR/Frameworks" ]; then
 	log 3 "Codesigning frameworks"
 fi
