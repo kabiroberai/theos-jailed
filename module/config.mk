@@ -6,7 +6,7 @@ THEOS_JAILED_LIB = $(THEOS_JAILED_PATH)/lib
 # Shell scripts
 export MESSAGES = $(THEOS_JAILED_BIN)/messages
 export INIT = $(THEOS_JAILED_BIN)/init
-export INFO_TEMPLATE = $(THEOS_JAILED_BIN)/info-template.txt
+export INFO_TEMPLATE = $(THEOS_JAILED_BIN)/info.txt
 
 # Directories
 export RESOURCES_DIR ?= Resources

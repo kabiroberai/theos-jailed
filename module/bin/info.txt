@@ -17,6 +17,7 @@
 4. Add a new App ID with the following information:
 	a. For "Explicit App ID" / "Bundle ID" use: $BUNDLE_ID
 	b. Under "App Services" enable the following services:
+
 $ENT_LIST
 
 5. Add a new Provisioning Profile
