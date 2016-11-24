@@ -88,7 +88,7 @@ cd "$STAGING_DIR"
 
 # re-pack the .ipa
 log 1 "Repacking $APP"
-IPA_PATCHED="`basename "${IPA%*.ipa}-patched.ipa"`"
+IPA_PATCHED="$TWEAK_NAME.ipa"
 zip -9r "$IPA_PATCHED" Payload/ >/dev/null 2>&1
 if [ "$?" != "0" ]; then
 	error "Failed to compress the app into a .ipa file."
