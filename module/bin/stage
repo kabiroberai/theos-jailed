@@ -8,12 +8,17 @@ if [ "$?" != "0" ]; then
 	error "Failed to get codesign name"
 fi
 
+if [ ! -r "$PROFILE" ]; then
+	BUNDLEPROFILE="`grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1`"
+	if [ ! -r "$BUNDLEPROFILE" ]; then
+		error "Failed to find profile for '$PROFILE'"
+	fi
+	PROFILE="$BUNDLEPROFILE"
+fi
+
 if [ ! -r "$IPA" ]; then
 	error "\"$IPA\" not found or not readable"
 fi
-
-rm -rf "$STAGING_DIR" >/dev/null 2>&1
-mkdir -p "$STAGING_DIR"
 
 log 1 "Unpacking `basename "$IPA"`"
 unzip -d "$STAGING_DIR" "$IPA" >/dev/null 2>&1

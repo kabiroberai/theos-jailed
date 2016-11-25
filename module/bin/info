@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$INIT" "Generating info for `basename "$IPA"`"
+source "$STAGE" "Generating info for `basename "$IPA"`"
 
 codesign -d --entitlements - "$APPDIR/$APP_BINARY" > "$ENTITLEMENTS" 2>/dev/null
 if [ "$?" != "0" ]; then
