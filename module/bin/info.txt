@@ -44,9 +44,9 @@ $ENT_LIST
 	Note: You can't install over the top of the real application,
 	      so it must be deleted first. This only needs to be done
 	      once per patched application.
-2. Run "make ipa deploy [PROFILE=<mobileprovision | bundle.id>]" to patch and install the .ipa
+2. Run "make package install [PROFILE=<mobileprovision | bundle.id>]" to patch and install the .ipa
 	Note: If you omit the profile, the script will try to use Xcode's iOS Wildcard App ID
-3. Do the following only if the "deploy" part didn't work
+3. Do the following only if the "install" part didn't work
 	a. In Xcode goto Window / Devices
 	b. Under "Installed Apps" click the + button
 	c. Choose the patched .ipa file and cross your fingers

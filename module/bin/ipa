@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$INIT" "Patchinig tweak $TWEAK_NAME"
+source "$INIT"
 
 # https://github.com/dado3212/SnapchatReloaded/blob/master/patchapp.sh
 if [ ! -r "$PROFILE" ]; then
@@ -88,15 +88,10 @@ cd "$STAGING_DIR"
 
 # re-pack the .ipa
 log 1 "Repacking $APP"
-IPA_PATCHED="$TWEAK_NAME.ipa"
-zip -9r "$IPA_PATCHED" Payload/ >/dev/null 2>&1
+zip -9r "$OUTPUT_NAME" Payload/ >/dev/null 2>&1
 if [ "$?" != "0" ]; then
 	error "Failed to compress the app into a .ipa file."
 fi
-mkdir -p "$PACKAGES_DIR"
-rm -f "$PACKAGES_DIR/$IPA_PATCHED" >/dev/null 2>&1
-mv "$IPA_PATCHED" "$PACKAGES_DIR/"
-if [ "$?" != "0" ]; then
-	error "Failed to move .ipa file into $PACKAGES_DIR."
-fi
-success "Wrote $IPA_PATCHED"
+rm -f "$PACKAGES_DIR/$OUTPUT_NAME" >/dev/null 2>&1
+mv "$OUTPUT_NAME" "$PACKAGES_DIR/"
+success "Wrote $OUTPUT_NAME"

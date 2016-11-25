@@ -10,12 +10,13 @@ export INFO_TEMPLATE = $(THEOS_JAILED_BIN)/info.txt
 
 # Directories
 export RESOURCES_DIR ?= Resources
-export STAGING_DIR = $(_THEOS_LOCAL_DATA_DIR)/jailed
+export STAGING_DIR = $(THEOS_STAGING_DIR)
 export PACKAGES_DIR = $(THEOS_PROJECT_DIR)/$(THEOS_PACKAGE_DIR_NAME)
 
 # Resources
 export IPA ?= $($(TWEAK_NAME)_IPA)
 export DYLIB ?= $(THEOS_OBJ_DIR)/$(TWEAK_NAME).dylib
+export OUTPUT_NAME = $(TWEAK_NAME).ipa
 
 # Codesigning
 export DEV_CERT_NAME ?= iPhone Developer
