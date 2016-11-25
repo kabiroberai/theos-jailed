@@ -2,35 +2,37 @@
 
 source "$MESSAGES" "$1"
 
-CODESIGN_NAME=`security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\"`
+codesign_name="$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")"
 
 if [ "$?" != "0" ]; then
 	error "Failed to get codesign name"
 fi
 
 if [ ! -r "$PROFILE" ]; then
-	BUNDLEPROFILE="`grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1`"
-	if [ ! -r "$BUNDLEPROFILE" ]; then
+	bundleprofile="$(grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1)"
+	if [ ! -r "$bundleprofile" ]; then
 		error "Failed to find profile for '$PROFILE'"
 	fi
-	PROFILE="$BUNDLEPROFILE"
+	PROFILE="$bundleprofile"
 fi
 
 if [ ! -r "$IPA" ]; then
 	error "\"$IPA\" not found or not readable"
 fi
 
-log 1 "Unpacking `basename "$IPA"`"
+log 1 "Unpacking $(basename "$IPA")"
+rm -rf "$STAGING_DIR"
+mkdir -p "$STAGING_DIR"
 unzip -d "$STAGING_DIR" "$IPA" >/dev/null 2>&1
 if [ "$?" != "0" ]; then
 	error "Failed to unzip \"$IPA\""
 fi
 
-APP="`basename "$STAGING_DIR"/Payload/*.app`"
-APPDIR="$STAGING_DIR/Payload/$APP"
-if [ ! -d "$APPDIR" ]; then
+app="$(basename "$STAGING_DIR"/Payload/*.app)"
+appdir="$STAGING_DIR/Payload/$app"
+if [ ! -d "$appdir" ]; then
 	error "\"$IPA\" does not contain an application"
 fi
 
-BUNDLE_ID="`defaults read "$APPDIR/Info.plist" CFBundleIdentifier`-patched"
-APP_BINARY="`defaults read "$APPDIR/Info.plist" CFBundleExecutable`"
+bundle_id="$(defaults read "$appdir/Info.plist" CFBundleIdentifier)-patched"
+app_binary="$(defaults read "$appdir/Info.plist" CFBundleExecutable)"

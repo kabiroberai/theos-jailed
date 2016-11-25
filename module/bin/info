@@ -1,54 +1,55 @@
 #!/bin/bash
 
-source "$STAGE" "Generating info for `basename "$IPA"`"
+source "$STAGE" "Generating info for $(basename "$IPA")"
 
-codesign -d --entitlements - "$APPDIR/$APP_BINARY" > "$ENTITLEMENTS" 2>/dev/null
+codesign -d --entitlements - "$appdir/$app_binary" > "$ENTITLEMENTS" 2>/dev/null
 if [ "$?" != "0" ]; then
-	error "Failed to get entitlements for $APPDIR/$APP_BINARY"
+	error "Failed to get entitlements for $appdir/$app_binary"
 fi
 
-for ENT in `grep -a '<key>' "$ENTITLEMENTS"`; do
-	ENTITLEMENT=`echo $ENT | cut -f2 -d\> | cut -f1 -d\<`
-	NEXT=""
-	case $ENTITLEMENT in
+function add { ent_list="$ent_list"$'\n'"$1"; }
+
+for ent in $(grep -a '<key>' "$ENTITLEMENTS"); do
+	entitlement=$(echo $ent | cut -f2 -d\> | cut -f1 -d\<)
+	case $entitlement in
 		com.apple.developer.networking.vpn.api)
-			NEXT=">>> VPN Configuration & Control"
+			add ">>> VPN Configuration & Control"
 			;;
 		com.apple.developer.in-app-payments)
-			NEXT=">>> Apple Pay (requires extra configuration)"
+			add ">>> Apple Pay (requires extra configuration)"
 			;;
 		com.apple.external-accessory.wireless-configuration)
-			NEXT=">>> Wireless Accessory Configuration"
+			add ">>> Wireless Accessory Configuration"
 			;;
 		com.apple.developer.homekit)
-			NEXT=">>> HomeKit"
+			add ">>> HomeKit"
 			;;
 		com.apple.security.application-groups)
-			NEXT=">>> App Groups:"
-			for GROUP in `dd if="$ENTITLEMENTS" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null`; do
-				GROUP_ID=`echo $GROUP | cut -f2 -d\> | cut -f1 -d\<`-patched
-				NEXT="$NEXT"$'\n'"    $GROUP_ID"
+			add ">>> App Groups:"
+			for group in $(dd if="$ENTITLEMENTS" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null); do
+				group_id=$(echo $group | cut -f2 -d\> | cut -f1 -d\<)-patched
+				add "    $group_id"
 			done
 			;;
 		com.apple.developer.associated-domains)
-			NEXT=">>> Associated Domains"
+			add ">>> Associated Domains"
 			;;
 		com.apple.developer.healthkit)
-			NEXT=">>> HealthKit"
+			add ">>> HealthKit"
 			;;
 		inter-app-audio)
-			NEXT=">>> Inter-App Audio"
+			add ">>> Inter-App Audio"
 			;;
 		com.apple.developer.ubiquity*)
-			NEXT=">>> Passbook"
-			NEXT=">>> iCloud (requires extra configuration)"
-			NEXT=">>> Data Protection"
+			add ">>> Passbook"
+			add ">>> iCloud (requires extra configuration)"
+			add ">>> Data Protection"
 			;;
 	esac
-	ENT_LIST="$ENT_LIST"$'\n'"$NEXT"
 done
 
-ENT_LIST=`echo "$ENT_LIST" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba'`
+ent_list="$(echo "$ent_list" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba')" # Remove extra newlines
+[ -n "$ent_list" ] && ent_list=$'\n'"$ent_list"$'\n' # Add newline padding if ent_list isn't empty
 
 eval "less <<EOF
 $(<$INFO_TEMPLATE)" 2> /dev/null

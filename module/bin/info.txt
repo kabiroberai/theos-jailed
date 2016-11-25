@@ -15,14 +15,12 @@
 2. Choose "Certificates, Identifiers & Profiles"
 3. From "iOS Apps" choose "Identifiers"
 4. Add a new App ID with the following information:
-	a. For "Explicit App ID" / "Bundle ID" use: $BUNDLE_ID
+	a. For "Explicit App ID" / "Bundle ID" use: $bundle_id
 	b. Under "App Services" enable the following services:
-
-$ENT_LIST
-
+$ent_list
 5. Add a new Provisioning Profile
 	a. For "type of provisioning profile" choose "iOS App Development"
-	b. For "App ID" choose "$BUNDLE_ID"
+	b. For "App ID" choose "$bundle_id"
 	c. Choose the development cert you want associate with this profile (or "select All")
 	d. "Select All" devices unless you want to choose a specific device
 	e. Give the profile a name, anything will do.

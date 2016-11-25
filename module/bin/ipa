@@ -5,61 +5,61 @@ source "$STAGE"
 # copy resources into the .app folder
 if [ -d "$RESOURCES_DIR" ]; then
 	log 2 "Copying resources"
-	cp -a "$RESOURCES_DIR"/ "$APPDIR"
+	cp -a "$RESOURCES_DIR"/ "$appdir"
 fi
 
 # copy files into the .app folder
 log 2 "Copying .dylib dependencies"
-cp "$DYLIB" "$APPDIR"
-INJECT_FILES=("$DYLIB")
+cp "$DYLIB" "$appdir"
+inject_files=("$DYLIB")
 
 if [ "$USE_CYCRIPT" = "1" ]; then
-	cp "$CYCRIPT" "$APPDIR"
-	INJECT_FILES+=("$CYCRIPT")
+	cp "$CYCRIPT" "$appdir"
+	inject_files+=("$CYCRIPT")
 fi
 
 if [ "$USE_SUBSTRATE" = "1" ]; then
-	cp -a "$SUBSTRATE" "$APPDIR"
+	cp -a "$SUBSTRATE" "$appdir"
 fi
 
 # inject the tweak .dylib and optionally Cycript
 log 3 "Injecting .dylib dependencies"
-for file in "${INJECT_FILES[@]}"; do
-	optool install -c load -p "@executable_path/`basename "$file"`" -t "$APPDIR/$APP_BINARY" >& /dev/null
+for file in "${inject_files[@]}"; do
+	optool install -c load -p "@executable_path/$(basename "$file")" -t "$appdir/$app_binary" >& /dev/null
 	if [ "$?" != "0" ]; then
-		error "Failed to inject $file into $APP"
+		error "Failed to inject $file into $app"
 	fi
 done
 
 # generate the correct entitlements
 log 4 "Generating entitlements"
-PROFILE_ENT="`strings "$PROFILE" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d'`"
+profile_ent="$(strings "$PROFILE" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d')"
 cat <<XML > "$ENTITLEMENTS"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-$PROFILE_ENT
+$profile_ent
 </dict>
 </plist>
 XML
 
 # re-sign dependencies and the .app
 log 5 "Codesigning dependencies"
-for file in `find -d "$APPDIR" -not -path "*.framework/*" \( -name "*.framework" -o -name "*.dylib" \)`; do
-	codesign -fs "$CODESIGN_NAME" "$file" >& /dev/null
+for file in $(find -d "$appdir" -not -path "*.framework/*" \( -name "*.framework" -o -name "*.dylib" \)); do
+	codesign -fs "$codesign_name" "$file" >& /dev/null
 	if [ "$?" != "0" ]; then
 		error "Codesign failed"
 	fi
 done
 
-log 5 "Codesigning $APP"
-codesign -fs "$CODESIGN_NAME" --deep --entitlements "$ENTITLEMENTS" "$APPDIR" 2>/dev/null
+log 5 "Codesigning $app"
+codesign -fs "$codesign_name" --deep --entitlements "$ENTITLEMENTS" "$appdir" 2>/dev/null
 if [ "$?" != "0" ]; then
-	error "Failed to sign $APP with entitlements $ENTITLEMENTS"
+	error "Failed to sign $app with entitlements $ENTITLEMENTS"
 fi
 
 # repack the .ipa
-log 6 "Repacking $APP"
+log 6 "Repacking $app"
 cd "$STAGING_DIR"
 zip -9r "$OUTPUT_NAME" Payload/ >/dev/null 2>&1
 if [ "$?" != "0" ]; then
