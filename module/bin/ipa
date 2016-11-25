@@ -8,24 +8,27 @@ if [ -d "$RESOURCES_DIR" ]; then
 	cp -a "$RESOURCES_DIR"/ "$appdir"
 fi
 
-# copy files into the .app folder
-log 2 "Copying .dylib dependencies"
-cp "$DYLIB" "$appdir"
+# copy .dylib files into the .app folder
+copy_files=("$DYLIB")
 inject_files=("$DYLIB")
-
 if [ "$USE_CYCRIPT" = "1" ]; then
-	cp "$CYCRIPT" "$appdir"
+	copy_files+=("$CYCRIPT")
 	inject_files+=("$CYCRIPT")
 fi
-
 if [ "$USE_SUBSTRATE" = "1" ]; then
-	cp -a "$SUBSTRATE" "$appdir"
+	copy_files+=("$SUBSTRATE")
 fi
+
+log 2 "Copying .dylib dependencies"
+mkdir -p "$appdir/Frameworks"
+for file in "${copy_files[@]}"; do
+	cp -a "$file" "$appdir/Frameworks"
+done
 
 # inject the tweak .dylib and optionally Cycript
 log 3 "Injecting .dylib dependencies"
 for file in "${inject_files[@]}"; do
-	optool install -c load -p "@executable_path/$(basename "$file")" -t "$appdir/$app_binary" >& /dev/null
+	optool install -c load -p "@executable_path/Frameworks/$(basename "$file")" -t "$appdir/$app_binary" >& /dev/null
 	if [ "$?" != "0" ]; then
 		error "Failed to inject $file into $app"
 	fi
@@ -44,9 +47,10 @@ $profile_ent
 XML
 
 # re-sign dependencies and the .app
-log 5 "Codesigning dependencies"
-for file in $(find -d "$appdir" -not -path "*.framework/*" \( -name "*.framework" -o -name "*.dylib" \)); do
-	codesign -fs "$codesign_name" "$file" >& /dev/null
+log 5 "Codesigning frameworks"
+for file in $(ls -1 "$appdir/Frameworks" 2>/dev/null); do
+	echo "$file"
+	codesign -fs "$codesign_name" "$appdir/Frameworks/$file" >& /dev/null
 	if [ "$?" != "0" ]; then
 		error "Codesign failed"
 	fi
