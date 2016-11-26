@@ -14,7 +14,7 @@ export STAGING_DIR := $(THEOS_STAGING_DIR)
 export PACKAGES_DIR := $(THEOS_PROJECT_DIR)/$(THEOS_PACKAGE_DIR_NAME)
 
 # Resources
-export IPA ?= $($(TWEAK_NAME)_IPA)
+export IPA ?= $(strip $($(TWEAK_NAME)_IPA))
 export DYLIB ?= $(THEOS_OBJ_DIR)/$(TWEAK_NAME).dylib
 export OUTPUT_NAME = $(TWEAK_NAME).ipa
 
