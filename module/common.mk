@@ -4,8 +4,8 @@ THEOS_JAILED_BIN := $(THEOS_JAILED_PATH)/bin
 THEOS_JAILED_LIB := $(THEOS_JAILED_PATH)/lib
 
 # Shell scripts
-export MESSAGES := $(THEOS_JAILED_BIN)/messages
-export STAGE := $(THEOS_JAILED_BIN)/stage
+export MESSAGES := $(THEOS_JAILED_BIN)/messages.sh
+export STAGE := $(THEOS_JAILED_BIN)/stage.sh
 export INFO_TEMPLATE := $(THEOS_JAILED_BIN)/info.txt
 
 # Directories

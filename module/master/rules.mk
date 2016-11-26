@@ -1,4 +1,4 @@
 .PHONY: info
 
 info:
-	$(ECHO_NOTHING)$(THEOS_JAILED_BIN)/info$(ECHO_END)
+	$(ECHO_NOTHING)$(THEOS_JAILED_BIN)/info.sh$(ECHO_END)

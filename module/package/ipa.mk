@@ -8,6 +8,6 @@ internal-package-check::
 endif
 
 internal-package::
-	$(ECHO_NOTHING)$(THEOS_JAILED_BIN)/ipa$(ECHO_END)
+	$(ECHO_NOTHING)$(THEOS_JAILED_BIN)/ipa.sh$(ECHO_END)
 
 after-package:: __THEOS_LAST_PACKAGE_FILENAME = $(THEOS_PACKAGE_DIR)/$(OUTPUT_NAME)
