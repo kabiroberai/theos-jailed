@@ -32,4 +32,4 @@ export USE_SUBSTRATE := $(call __theos_bool,$(or $($(TWEAK_NAME)_USE_SUBSTRATE),
 export SUBSTRATE ?= $(THEOS_JAILED_LIB)/CydiaSubstrate.framework
 
 # Miscellaneous
-export TWEAK_NAME
+export TWEAK_NAME PRINT_FORMAT_MAKING PRINT_FORMAT_STAGE PRINT_FORMAT_ERROR
