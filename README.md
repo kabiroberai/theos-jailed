@@ -32,5 +32,5 @@ Usage
 * Run `make info` and follow the instructions to create a Provisioning Profile
 * Run `make package install`
     * Set the `PROFILE` makefile variable to a .mobileprovision file or bundle id if you don't want to use Xcode's Wildcard App ID
-    * Set `USE_CYCRIPT=1` to be able to remotely attach to Cycript using `cycript -r hostname:31337`
-    * Set `USE_FISHHOOK=1` to use [fishhook](https://github.com/facebook/fishhook) (remember to `#import <fishhook.h>` as well)
+    * Set `TWEAK_NAME_USE_CYCRIPT=1` to be able to remotely attach to Cycript using `cycript -r hostname:31337`
+    * Set `TWEAK_NAME_USE_FISHHOOK=1` to use [fishhook](https://github.com/facebook/fishhook) (remember to `#import <fishhook.h>` as well)
