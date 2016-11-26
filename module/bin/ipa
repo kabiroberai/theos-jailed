@@ -49,7 +49,6 @@ XML
 # re-sign dependencies and the .app
 log 5 "Codesigning frameworks"
 for file in $(ls -1 "$appdir/Frameworks" 2>/dev/null); do
-	echo "$file"
 	codesign -fs "$codesign_name" "$appdir/Frameworks/$file" >& /dev/null
 	if [ "$?" != "0" ]; then
 		error "Codesign failed"
