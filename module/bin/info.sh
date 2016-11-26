@@ -32,7 +32,11 @@ for ent in $(grep -a '<key>' "$ENTITLEMENTS"); do
 			done
 			;;
 		com.apple.developer.associated-domains)
-			add ">>> Associated Domains"
+			add ">>> Associated Domains:"
+			for group in $(dd if="$ENTITLEMENTS" bs=1 skip=8 2>/dev/null | sed -ne '/associated-domains/,/<\/array/p' | grep '<string>' 2>/dev/null); do
+				group_id=$(echo $group | cut -f2 -d: | cut -f1 -d\<)
+				add "    $group_id"
+			done
 			;;
 		com.apple.developer.healthkit)
 			add ">>> HealthKit"
