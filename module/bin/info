@@ -3,7 +3,7 @@
 source "$STAGE" "Generating info for $(basename "$IPA")"
 
 codesign -d --entitlements - "$appdir/$app_binary" > "$ENTITLEMENTS" 2>/dev/null
-if [ "$?" != "0" ]; then
+if [[ $? != 0 ]]; then
 	error "Failed to get entitlements for $appdir/$app_binary"
 fi
 
@@ -49,7 +49,7 @@ for ent in $(grep -a '<key>' "$ENTITLEMENTS"); do
 done
 
 ent_list="$(echo "$ent_list" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba')" # Remove extra newlines
-[ -n "$ent_list" ] && ent_list=$'\n'"$ent_list"$'\n' # Add newline padding if ent_list isn't empty
+[[ -n $ent_list ]] && ent_list=$'\n'"$ent_list"$'\n' # Add newline padding if ent_list isn't empty
 
 eval "less <<EOF
 $(<$INFO_TEMPLATE)" 2> /dev/null

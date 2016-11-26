@@ -3,7 +3,7 @@
 source "$STAGE"
 
 # copy resources into the .app folder
-if [ -d "$RESOURCES_DIR" ]; then
+if [[ -d $RESOURCES_DIR ]]; then
 	log 2 "Copying resources"
 	cp -a "$RESOURCES_DIR"/ "$appdir"
 fi
@@ -11,11 +11,11 @@ fi
 # copy .dylib files into the .app folder
 copy_files=("$DYLIB")
 inject_files=("$DYLIB")
-if [ "$USE_CYCRIPT" = "1" ]; then
+if [[ $USE_CYCRIPT = 1 ]]; then
 	copy_files+=("$CYCRIPT")
 	inject_files+=("$CYCRIPT")
 fi
-if [ "$USE_SUBSTRATE" = "1" ]; then
+if [[ $USE_SUBSTRATE = 1 ]]; then
 	copy_files+=("$SUBSTRATE")
 fi
 
@@ -29,7 +29,7 @@ done
 log 3 "Injecting .dylib dependencies"
 for file in "${inject_files[@]}"; do
 	optool install -c load -p "@executable_path/Frameworks/$(basename "$file")" -t "$appdir/$app_binary" >& /dev/null
-	if [ "$?" != "0" ]; then
+	if [[ $? != 0 ]]; then
 		error "Failed to inject $file into $app"
 	fi
 done
@@ -50,14 +50,14 @@ XML
 log 5 "Codesigning frameworks"
 for file in $(ls -1 "$appdir/Frameworks" 2>/dev/null); do
 	codesign -fs "$codesign_name" "$appdir/Frameworks/$file" >& /dev/null
-	if [ "$?" != "0" ]; then
+	if [[ $? != 0 ]]; then
 		error "Codesign failed"
 	fi
 done
 
 log 5 "Codesigning $app"
 codesign -fs "$codesign_name" --deep --entitlements "$ENTITLEMENTS" "$appdir" 2>/dev/null
-if [ "$?" != "0" ]; then
+if [[ $? != 0 ]]; then
 	error "Failed to sign $app with entitlements $ENTITLEMENTS"
 fi
 
@@ -65,7 +65,7 @@ fi
 log 6 "Repacking $app"
 cd "$STAGING_DIR"
 zip -9r "$OUTPUT_NAME" Payload/ >/dev/null 2>&1
-if [ "$?" != "0" ]; then
+if [[ $? != 0 ]]; then
 	error "Failed to compress the app into a .ipa file"
 fi
 rm -f "$PACKAGES_DIR/$OUTPUT_NAME" >/dev/null 2>&1
