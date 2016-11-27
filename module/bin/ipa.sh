@@ -5,7 +5,13 @@ source "$STAGE"
 # copy resources into the .app folder
 if [[ -d $RESOURCES_DIR ]]; then
 	log 2 "Copying resources"
-	cp -a "$RESOURCES_DIR"/ "$appdir"
+	rsync -a "$RESOURCES_DIR"/ "$appdir" --exclude "Info.plist"
+	if [[ -f "$RESOURCES_DIR/Info.plist" ]]; then
+		log 2 "Merging Info.plist"
+		cp "$RESOURCES_DIR/Info.plist" "$STAGING_DIR"
+		/usr/libexec/PlistBuddy -c "Merge $appdir/Info.plist" "$STAGING_DIR/Info.plist" &>/dev/null
+		mv "$STAGING_DIR/Info.plist" "$appdir"
+	fi
 fi
 
 # copy .dylib files into the .app folder
@@ -64,9 +70,9 @@ fi
 # repack the .ipa
 log 6 "Repacking $app"
 cd "$STAGING_DIR"
-zip -9r "$OUTPUT_NAME" Payload/ >/dev/null 2>&1
+zip -9r "$OUTPUT_NAME" Payload/ &>/dev/null
 if [[ $? != 0 ]]; then
 	error "Failed to compress the app into a .ipa file"
 fi
-rm -f "$PACKAGES_DIR/$OUTPUT_NAME" >/dev/null 2>&1
+rm -f "$PACKAGES_DIR/$OUTPUT_NAME" &>/dev/null
 mv "$OUTPUT_NAME" "$PACKAGES_DIR/"
