@@ -23,7 +23,7 @@ fi
 log 1 "Unpacking $(basename "$IPA")"
 rm -rf "$STAGING_DIR"
 mkdir -p "$STAGING_DIR"
-unzip -d "$STAGING_DIR" "$IPA" >/dev/null 2>&1
+unzip "$IPA" "Payload/*" -d "$STAGING_DIR" >/dev/null 2>&1
 if [[ $? != 0 ]]; then
 	error "Failed to unzip \"$IPA\""
 fi
