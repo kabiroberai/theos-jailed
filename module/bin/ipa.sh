@@ -74,5 +74,5 @@ zip -9r "$OUTPUT_NAME" Payload/ &>/dev/null
 if [[ $? != 0 ]]; then
 	error "Failed to compress the app into a .ipa file"
 fi
-rm -f "$PACKAGES_DIR/$OUTPUT_NAME" &>/dev/null
+rm -f "$PACKAGES_DIR"/*.ipa &>/dev/null
 mv "$OUTPUT_NAME" "$PACKAGES_DIR/"

@@ -10,4 +10,4 @@ internal-install-check::
 endif
 
 internal-install:: internal-install-check
-	$(ECHO_INSTALLING)ios-deploy -$(THEOS_DEPLOY_FLAG)Wb "$(STAGING_DIR)"/Payload/*.app$(ECHO_END)
+	$(ECHO_INSTALLING)IPA="$(_THEOS_PACKAGE_LAST_FILENAME)" source "$(STAGE)";ios-deploy -$(THEOS_DEPLOY_FLAG)Wb "$$appdir"$(ECHO_END)
