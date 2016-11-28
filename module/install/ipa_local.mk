@@ -4,9 +4,9 @@ else
 THEOS_DEPLOY_FLAG = L
 endif
 
-ifeq ($(shell command -v ios-deploy 2> /dev/null),)
+ifneq ($(call __executable,ios-deploy),$(_THEOS_TRUE))
 internal-install-check::
-	@$(PRINT_FORMAT_ERROR) "Install ios-deploy and add it to your PATH: https://github.com/phonegap/ios-deploy#installation" >&2; exit 1
+	@$(PRINT_FORMAT_ERROR) "$(MAKE) requires ios-deploy: https://github.com/phonegap/ios-deploy#installation" >&2; exit 1
 endif
 
 internal-install:: internal-install-check
