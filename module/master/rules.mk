@@ -1,4 +1,4 @@
 .PHONY: info
 
 info:
-	$(ECHO_NOTHING)$(THEOS_JAILED_BIN)/info.sh$(ECHO_END)
+	@$(PRINT_FORMAT_MAKING) "Generating info for $$(basename "$$IPA")";"$(INFO_SCRIPT)"

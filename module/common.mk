@@ -7,6 +7,9 @@ THEOS_JAILED_LIB := $(THEOS_JAILED_PATH)/lib
 export MESSAGES := $(THEOS_JAILED_BIN)/messages.sh
 export STAGE := $(THEOS_JAILED_BIN)/stage.sh
 export INFO_TEMPLATE := $(THEOS_JAILED_BIN)/info.txt
+export INFO_SCRIPT := $(THEOS_JAILED_BIN)/info.sh
+export IPA_SCRIPT := $(THEOS_JAILED_BIN)/ipa.sh
+export EXO_SCRIPT := $(THEOS_JAILED_BIN)/exo.sh
 
 # Directories
 export RESOURCES_DIR ?= Resources

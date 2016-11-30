@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$MESSAGES" "$1"
+source "$MESSAGES"
 
 codesign_name="$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")"
 
