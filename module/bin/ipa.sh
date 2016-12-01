@@ -33,6 +33,7 @@ done
 
 # inject the tweak .dylib and optionally Cycript
 log 3 "Injecting .dylib dependencies"
+app_binary="$(defaults read "$appdir/Info.plist" CFBundleExecutable)"
 for file in "${inject_files[@]}"; do
 	optool install -c load -p "@executable_path/Frameworks/$(basename "$file")" -t "$appdir/$app_binary" >& /dev/null
 	if [[ $? != 0 ]]; then

@@ -2,59 +2,44 @@
 
 source "$STAGE"
 
+bundle_id="$(defaults read "$appdir/Info.plist" CFBundleIdentifier)"
+product_name="${bundle_id##*.}"
+
+r=$(tput sgr0)
+b=$(tput bold)
+n=$'\n'
+function add { capabilities="$capabilities$n>>> $b$1$r"; }
+
 codesign -d --entitlements - "$appdir/$app_binary" > "$ENTITLEMENTS" 2>/dev/null
 if [[ $? != 0 ]]; then
 	error "Failed to get entitlements for $appdir/$app_binary"
 fi
 
-n=$'\n'
-function addline { ent_list="$ent_list$n$1"; }
-function add { addline ">>> $1"; } # Add heading
-
 for ent in $(grep -a '<key>' "$ENTITLEMENTS"); do
-	ent=$(echo $ent | cut -f2 -d\> | cut -f1 -d\<)
-	case $ent in
+	case $(echo $ent | cut -f2 -d\> | cut -f1 -d\<) in
 		com.apple.developer.networking.vpn.api)
-			add "VPN Configuration & Control"
-			;;
-		com.apple.developer.in-app-payments)
-			add "Apple Pay (requires extra configuration)"
-			;;
+			add "Personal VPN";;
 		com.apple.external-accessory.wireless-configuration)
-			add "Wireless Accessory Configuration"
-			;;
+			add "Wireless Accessory Configuration";;
 		com.apple.developer.homekit)
-			add "HomeKit"
-			;;
-		com.apple.security.application-groups)
-			add "App Groups:"
-			for group in $(dd if="$ENTITLEMENTS" bs=1 skip=8 2>/dev/null | sed -ne '/application-groups/,/<\/array/p' | grep '<string>' 2>/dev/null); do
-				group_id=$(echo $group | cut -f2 -d\> | cut -f1 -d\<)-patched
-				addline "    $group_id"
-			done
-			;;
-		com.apple.developer.associated-domains)
-			add "Associated Domains (requires extra configuration):"
-			for group in $(dd if="$ENTITLEMENTS" bs=1 skip=8 2>/dev/null | sed -ne '/associated-domains/,/<\/array/p' | grep '<string>' 2>/dev/null); do
-				group_id=$(echo $group | cut -f2 -d: | cut -f1 -d\<)
-				addline "    $group_id"
-			done
-			;;
+			add "HomeKit";;
 		com.apple.developer.healthkit)
-			add "HealthKit"
-			;;
+			add "HealthKit";;
 		inter-app-audio)
-			add "Inter-App Audio"
-			;;
-		com.apple.developer.ubiquity*)
-			add "Passbook"
-			add "iCloud (requires extra configuration)"
-			add "Data Protection"
-			;;
+			add "Inter-App Audio";;
+		com.apple.developer.siri)
+			add "Siri";;
+		com.apple.developer.icloud*)
+			add "iCloud (requires extra configuration)";;
 	esac
 done
 
-ent_list="$(echo "$ent_list" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba')" # Remove extra newlines
-[[ -n $ent_list ]] && ent_list="$n$ent_list$n" # Add newline padding if ent_list isn't empty
+if [[ -n $capabilities ]]; then
+	capabilities="$(cat <<ENT
+12. Select the ${b}Capabilities$r tab to the right of ${b}General$r.
+13. Enable the following capabilities (ignore any that give you an error):
+$capabilities
+ENT)$n"
+fi
 
-eval "less <<EOF$n$(<$INFO_TEMPLATE)"
+eval "less -R <<EOF$n$(<$INFO_TEMPLATE)"

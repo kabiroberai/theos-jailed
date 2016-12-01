@@ -33,6 +33,3 @@ appdir="$STAGING_DIR/Payload/$app"
 if [[ ! -d $appdir ]]; then
 	error "\"$(basename "$IPA")\" does not contain an application"
 fi
-
-bundle_id="$(defaults read "$appdir/Info.plist" CFBundleIdentifier)-patched"
-app_binary="$(defaults read "$appdir/Info.plist" CFBundleExecutable)"
