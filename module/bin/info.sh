@@ -10,13 +10,13 @@ b=$(tput bold)
 n=$'\n'
 function add { capabilities="$capabilities$n>>> $b$1$r"; }
 
-codesign -d --entitlements - "$appdir/$app_binary" > "$ENTITLEMENTS" 2>/dev/null
+entitlements="$(codesign -d --entitlements - "$appdir/$app_binary" 2>/dev/null)"
 if [[ $? != 0 ]]; then
 	error "Failed to get entitlements for $appdir/$app_binary"
 fi
 
-for ent in $(grep -a '<key>' "$ENTITLEMENTS"); do
-	case $(echo $ent | cut -f2 -d\> | cut -f1 -d\<) in
+for ent in $(echo "$entitlements" | grep "<key>"); do
+	case $(echo "$ent" | cut -f2 -d\> | cut -f1 -d\<) in
 		com.apple.developer.networking.vpn.api)
 			add "Personal VPN";;
 		com.apple.external-accessory.wireless-configuration)

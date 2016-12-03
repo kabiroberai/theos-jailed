@@ -43,16 +43,19 @@ done
 
 # re-sign dependencies and the .app
 log 4 "Signing $app"
-/usr/libexec/PlistBuddy -x -c "Print :Entitlements" /dev/stdin <<< $(security cms -Di "$PROFILE" 2>/dev/null) > "$ENTITLEMENTS"
+entitlements=$(/usr/libexec/PlistBuddy -x -c "Print :Entitlements" /dev/stdin <<< $(security cms -Di "$PROFILE" 2>/dev/null))
+if [[ $? != 0 ]]; then
+	error "Failed to generate entitlements"
+fi
 
 find "$appdir" \( -name "*.framework" -or -name "*.dylib" \) -not -path "*.framework/*" -print0 | xargs -0 codesign -fs "$codesign_name" &>/dev/null
 if [[ $? != 0 ]]; then
 	error "Codesign failed"
 fi
 
-codesign -fs "$codesign_name" --deep --entitlements "$ENTITLEMENTS" "$appdir"
+codesign -fs "$codesign_name" --deep --entitlements /dev/stdin "$appdir" <<< "$entitlements"
 if [[ $? != 0 ]]; then
-	error "Failed to sign $app with entitlements $ENTITLEMENTS"
+	error "Failed to sign $app"
 fi
 
 # repack the .ipa
