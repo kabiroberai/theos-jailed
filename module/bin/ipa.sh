@@ -35,7 +35,7 @@ done
 log 3 "Injecting .dylib dependencies"
 app_binary="$(defaults read "$appdir/Info.plist" CFBundleExecutable)"
 for file in "${inject_files[@]}"; do
-	optool install -c load -p "@executable_path/Frameworks/$(basename "$file")" -t "$appdir/$app_binary" >& /dev/null
+	"$INSERT_DYLIB" --inplace --all-yes "@executable_path/Frameworks/$(basename "$file")" "$appdir/$app_binary" >& /dev/null
 	if [[ $? != 0 ]]; then
 		error "Failed to inject $file into $app"
 	fi
