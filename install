@@ -2,26 +2,24 @@
 set -e
 cd "$(dirname "$0")"
 
-function error { echo "[error] $1" >&2; exit 1; }
-function info { echo "[info] $1"; }
+function error { echo "Error: $1" >&2; exit 1; }
 
 # Modify these to specify a custom install path
-THEOS_PATH="$THEOS"
-TEMPLATE_DIR="kabiroberai"
+MODULE_PATH="$THEOS/mod/jailed/"
+TEMPLATE_PATH="$THEOS/templates/ios/kabiroberai/"
 
-MODULE_PATH="$THEOS_PATH/mod/jailed/"
-TEMPLATE_PATH="$THEOS_PATH/templates/ios/$TEMPLATE_DIR/"
-
-[ -d "$THEOS_PATH" ] || error "'$THEOS_PATH' is not a directory. Aborting..."
+[ -d "$THEOS" ] || error "\"$THEOS\" is not a directory. Aborting..."
 
 # Install module
+ln -s "$PWD/update" "module/bin/update"
 mkdir -p "$MODULE_PATH"
 rm -rf "$MODULE_PATH"/*
 cp -a module/ "$MODULE_PATH"
-info "Successfully installed module in '$MODULE_PATH'"
+rm "module/bin/update"
+echo "Successfully installed module."
 
 # Install template
-"$THEOS_PATH/bin/nicify.pl" template
+"$THEOS/bin/nicify.pl" template 2> /dev/null || error "Failed to nicify template"
 mkdir -p "$TEMPLATE_PATH"
 mv *.nic.tar "$TEMPLATE_PATH/jailed.nic.tar"
-info "Successfully installed template in '$TEMPLATE_PATH'"
+echo "Successfully installed template."

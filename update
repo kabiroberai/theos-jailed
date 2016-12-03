@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-cd "$(dirname "$0")"
+[[ -L $0 ]] && scriptdir="$(readlink "$0")" || scriptdir="$0"
+cd "$(dirname "$scriptdir")"
 
 git pull
 ./install
