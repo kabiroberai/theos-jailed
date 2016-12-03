@@ -5,7 +5,7 @@ source "$STAGE"
 # copy resources into the .app folder
 if [[ -d $RESOURCES_DIR ]]; then
 	log 2 "Copying resources"
-	rsync -a "$RESOURCES_DIR"/ "$appdir" --exclude "Info.plist"
+	rsync -a "$RESOURCES_DIR"/ "$appdir" --exclude "/Info.plist"
 	if [[ -f "$RESOURCES_DIR/Info.plist" ]]; then
 		log 2 "Merging Info.plist"
 		cp "$RESOURCES_DIR/Info.plist" "$STAGING_DIR"
