@@ -25,14 +25,14 @@ if [[ $USE_SUBSTRATE = 1 ]]; then
 	copy_files+=("$SUBSTRATE")
 fi
 
-log 2 "Copying .dylib dependencies"
+log 2 "Copying dependencies"
 mkdir -p "$appdir/Frameworks"
 for file in "${copy_files[@]}"; do
 	cp -a "$file" "$appdir/Frameworks"
 done
 
 # inject the tweak .dylib and optionally Cycript
-log 3 "Injecting .dylib dependencies"
+log 3 "Injecting dependencies"
 app_binary="$(defaults read "$appdir/Info.plist" CFBundleExecutable)"
 for file in "${inject_files[@]}"; do
 	"$INSERT_DYLIB" --inplace --all-yes "@executable_path/Frameworks/$(basename "$file")" "$appdir/$app_binary" >& /dev/null
@@ -41,35 +41,22 @@ for file in "${inject_files[@]}"; do
 	fi
 done
 
-# generate the correct entitlements
-log 4 "Generating entitlements"
-profile_ent="$(strings "$PROFILE" | sed -e '1,/<key>Entitlements<\/key>/d' -e '/<\/dict>/,$d')"
-cat <<XML > "$ENTITLEMENTS"
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-$profile_ent
-</dict>
-</plist>
-XML
-
 # re-sign dependencies and the .app
-log 5 "Codesigning frameworks"
-for file in $(ls -1 "$appdir/Frameworks" 2>/dev/null); do
-	codesign -fs "$codesign_name" "$appdir/Frameworks/$file" >& /dev/null
-	if [[ $? != 0 ]]; then
-		error "Codesign failed"
-	fi
-done
+log 4 "Signing $app"
+/usr/libexec/PlistBuddy -x -c "Print :Entitlements" /dev/stdin <<< $(security cms -Di "$PROFILE" 2>/dev/null) > "$ENTITLEMENTS"
 
-log 5 "Codesigning $app"
-codesign -fs "$codesign_name" --deep --entitlements "$ENTITLEMENTS" "$appdir" 2>/dev/null
+find "$appdir" \( -name "*.framework" -or -name "*.dylib" \) -not -path "*.framework/*" -print0 | xargs -0 codesign -fs "$codesign_name" &>/dev/null
+if [[ $? != 0 ]]; then
+	error "Codesign failed"
+fi
+
+codesign -fs "$codesign_name" --deep --entitlements "$ENTITLEMENTS" "$appdir"
 if [[ $? != 0 ]]; then
 	error "Failed to sign $app with entitlements $ENTITLEMENTS"
 fi
 
 # repack the .ipa
-log 6 "Repacking $app"
+log 4 "Repacking $app"
 cd "$STAGING_DIR"
 zip -9r "$OUTPUT_NAME" Payload/ &>/dev/null
 if [[ $? != 0 ]]; then

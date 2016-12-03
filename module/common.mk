@@ -25,7 +25,7 @@ export OUTPUT_NAME = $(TWEAK_NAME)$(_THEOS_INTERNAL_PACKAGE_VERSION).ipa
 
 # Codesigning
 export DEV_CERT_NAME ?= iPhone Developer
-export ENTITLEMENTS ?= $(STAGING_DIR)/entitlements.xml
+export ENTITLEMENTS ?= $(STAGING_DIR)/entitlements.plist
 export PROFILE ?= *
 
 # Cycript
