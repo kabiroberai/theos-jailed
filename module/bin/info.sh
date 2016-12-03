@@ -29,6 +29,12 @@ for ent in $(grep -a '<key>' "$ENTITLEMENTS"); do
 			add "Inter-App Audio";;
 		com.apple.developer.siri)
 			add "Siri";;
+		com.apple.security.application-groups)
+			add "App Groups";;
+		com.apple.developer.pass-type-identifiers)
+			add "Wallet";;
+		com.apple.developer.default-data-protection)
+			add "Data Protection";;
 		com.apple.developer.icloud*)
 			add "iCloud (requires extra configuration)";;
 	esac
