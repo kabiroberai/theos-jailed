@@ -5,3 +5,5 @@ info:
 
 update-jailed:
 	@$(PRINT_FORMAT_MAKING) "Updating theos-jailed";"$(UPDATE_SCRIPT)"
+
+update-theos:: update-jailed
