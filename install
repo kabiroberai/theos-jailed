@@ -11,11 +11,10 @@ TEMPLATE_PATH="$THEOS/templates/ios/kabiroberai/"
 [ -d "$THEOS" ] || error "\"$THEOS\" is not a directory. Aborting..."
 
 # Install module
-ln -s "$PWD/update" "module/bin/update"
+ln -fs "$PWD/update" "module/bin/update"
 mkdir -p "$MODULE_PATH"
 rm -rf "$MODULE_PATH"/*
 cp -a module/ "$MODULE_PATH"
-rm "module/bin/update"
 echo "Successfully installed module."
 
 # Install template
