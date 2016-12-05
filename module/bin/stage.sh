@@ -2,14 +2,14 @@
 
 source "$MESSAGES"
 
-codesign_name="$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")"
+codesign_name=$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")
 
 if [[ $? != 0 ]]; then
 	error "Failed to get codesign name"
 fi
 
 if [[ ! -r $PROFILE ]]; then
-	bundleprofile="$(grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1)"
+	bundleprofile=$(grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1)
 	if [[ ! -r $bundleprofile ]]; then
 		error "Failed to find profile for '$PROFILE'"
 	fi
@@ -28,7 +28,7 @@ if [[ $? != 0 ]]; then
 	error "Failed to unzip \"$IPA\""
 fi
 
-app="$(basename "$STAGING_DIR"/Payload/*.app)"
+app=$(basename "$STAGING_DIR"/Payload/*.app)
 appdir="$STAGING_DIR/Payload/$app"
 if [[ ! -d $appdir ]]; then
 	error "\"$(basename "$IPA")\" does not contain an application"

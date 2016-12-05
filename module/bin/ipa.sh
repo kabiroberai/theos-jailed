@@ -33,11 +33,11 @@ done
 
 # inject the tweak .dylib and optionally Cycript
 log 3 "Injecting dependencies"
-app_binary="$(defaults read "$appdir/Info.plist" CFBundleExecutable)"
+app_binary=$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$appdir/Info.plist")
 for file in "${inject_files[@]}"; do
-	"$INSERT_DYLIB" --inplace --all-yes "@executable_path/Frameworks/$(basename "$file")" "$appdir/$app_binary" >& /dev/null
+	"$INSERT_DYLIB" --inplace --all-yes "@executable_path/Frameworks/$(basename "$file")" "$appdir/$app_binary" &>/dev/null
 	if [[ $? != 0 ]]; then
-		error "Failed to inject $file into $app"
+		error "Failed to inject $(basename "$file") into $app"
 	fi
 done
 

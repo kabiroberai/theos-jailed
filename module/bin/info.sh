@@ -2,7 +2,7 @@
 
 source "$STAGE"
 
-bundle_id="$(defaults read "$appdir/Info.plist" CFBundleIdentifier)"
+bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$appdir/Info.plist")
 product_name="${bundle_id##*.}"
 
 r=$(tput sgr0)
@@ -10,7 +10,7 @@ b=$(tput bold)
 n=$'\n'
 function add { capabilities="$capabilities$n>>> $b$1$r"; }
 
-entitlements="$(codesign -d --entitlements - "$appdir/$app_binary" 2>/dev/null)"
+entitlements=$(codesign -d --entitlements - "$appdir/$app_binary" 2>/dev/null)
 if [[ $? != 0 ]]; then
 	error "Failed to get entitlements for $appdir/$app_binary"
 fi
