@@ -31,6 +31,10 @@ export PROFILE ?= *
 export USE_CYCRIPT = $(call __theos_bool,$(or $($(TWEAK_NAME)_USE_CYCRIPT),$(DEBUG)))
 export CYCRIPT ?= $(THEOS_JAILED_LIB)/Cycript.dylib
 
+# FLEX
+export USE_FLEX = $(call __theos_bool,$($(TWEAK_NAME)_USE_FLEX))
+export FLEX ?= $(THEOS_JAILED_LIB)/FLEX.dylib
+
 # CydiaSubstrate
 export USE_SUBSTRATE = $(or $($(TWEAK_NAME)_USE_SUBSTRATE),$(_THEOS_TARGET_DEFAULT_USE_SUBSTRATE),$(_THEOS_TRUE))
 export SUBSTRATE ?= $(THEOS_JAILED_LIB)/CydiaSubstrate.framework

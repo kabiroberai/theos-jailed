@@ -14,20 +14,15 @@ if [[ -d $RESOURCES_DIR ]]; then
 	fi
 fi
 
-# copy .dylib files into the .app folder
-copy_files=("$DYLIB")
-inject_files=("$DYLIB")
-if [[ $USE_CYCRIPT = 1 ]]; then
-	copy_files+=("$CYCRIPT")
-	inject_files+=("$CYCRIPT")
-fi
-if [[ $USE_SUBSTRATE = 1 ]]; then
-	copy_files+=("$SUBSTRATE")
-fi
-
+# copy .dylib files into the Frameworks dir
 log 2 "Copying dependencies"
+inject_files=("$DYLIB")
+[[ $USE_CYCRIPT = 1 ]] && inject_files+=("$CYCRIPT")
+[[ $USE_FLEX = 1 ]] && inject_files+=("$FLEX")
+[[ $USE_SUBSTRATE = 1 ]] && copy_files+=("$SUBSTRATE")
+
 mkdir -p "$appdir/Frameworks"
-for file in "${copy_files[@]}"; do
+for file in "${inject_files[@]}" "${copy_files[@]}"; do
 	cp -a "$file" "$appdir/Frameworks"
 done
 
