@@ -14,23 +14,24 @@ if [[ -d $RESOURCES_DIR ]]; then
 	fi
 fi
 
-# copy .dylib files into the Frameworks dir
+# copy .dylib files
 log 2 "Copying dependencies"
 inject_files=("$DYLIB" $ADDITIONAL_DYLIBS)
 [[ $USE_CYCRIPT = 1 ]] && inject_files+=("$CYCRIPT")
 [[ $USE_FLEX = 1 ]] && inject_files+=("$FLEX")
 [[ $USE_SUBSTRATE = 1 ]] && copy_files+=("$SUBSTRATE")
 
-mkdir -p "$appdir/Frameworks"
+mkdir -p "$appdir/$COPY_PATH"
 for file in "${inject_files[@]}" "${copy_files[@]}"; do
-	cp -a "$file" "$appdir/Frameworks"
+	cp -a "$file" "$appdir/$COPY_PATH"
 done
 
 # inject the tweak .dylib and optionally Cycript
 log 3 "Injecting dependencies"
-app_binary=$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$appdir/Info.plist")
+app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$appdir/Info.plist")"
+install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary" &>/dev/null
 for file in "${inject_files[@]}"; do
-	"$INSERT_DYLIB" --inplace --all-yes "@executable_path/Frameworks/$(basename "$file")" "$appdir/$app_binary" &>/dev/null
+	"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary" &>/dev/null
 	if [[ $? != 0 ]]; then
 		error "Failed to inject $(basename "$file") into $app"
 	fi
