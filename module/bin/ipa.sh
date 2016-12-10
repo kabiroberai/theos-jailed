@@ -49,7 +49,7 @@ if [[ $? != 0 ]]; then
 	error "Codesign failed"
 fi
 
-codesign -fs "$codesign_name" --deep --entitlements /dev/stdin "$appdir" <<< "$entitlements"
+codesign -fs "$codesign_name" --deep --entitlements /dev/stdin "$appdir" &>/dev/null <<< "$entitlements"
 if [[ $? != 0 ]]; then
 	error "Failed to sign $app"
 fi
@@ -57,9 +57,9 @@ fi
 # repack the .ipa
 log 4 "Repacking $app"
 cd "$STAGING_DIR"
-zip -9r "$OUTPUT_NAME" Payload/ &>/dev/null
+zip -r$COMPRESSION "$OUTPUT_NAME" Payload/ &>/dev/null
 if [[ $? != 0 ]]; then
-	error "Failed to compress the app into a .ipa file"
+	error "Failed to repack $app"
 fi
 rm -f "$PACKAGES_DIR"/*.ipa &>/dev/null
 mv "$OUTPUT_NAME" "$PACKAGES_DIR/"
