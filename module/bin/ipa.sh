@@ -16,7 +16,7 @@ fi
 
 # copy .dylib files into the Frameworks dir
 log 2 "Copying dependencies"
-inject_files=("$DYLIB")
+inject_files=("$DYLIB" $ADDITIONAL_DYLIBS)
 [[ $USE_CYCRIPT = 1 ]] && inject_files+=("$CYCRIPT")
 [[ $USE_FLEX = 1 ]] && inject_files+=("$FLEX")
 [[ $USE_SUBSTRATE = 1 ]] && copy_files+=("$SUBSTRATE")
