@@ -1,3 +1,6 @@
 [submodule "module/fishhook"]
 	path = module/lib/fishhook
 	url = https://github.com/facebook/fishhook.git
+[submodule "addons/flex/FLEX-submodule"]
+	path = addons/flex/Flipboard-FLEX
+	url = https://github.com/Flipboard/FLEX

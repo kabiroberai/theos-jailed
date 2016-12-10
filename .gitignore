@@ -1,1 +1,7 @@
 module/bin/update
+
+addons/*/.theos
+addons/*/obj
+addons/*/packages
+
+addons/flex/FLEX
