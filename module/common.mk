@@ -12,7 +12,6 @@ export INFO_SCRIPT := $(THEOS_JAILED_BIN)/info.sh
 export IPA_SCRIPT := $(THEOS_JAILED_BIN)/ipa.sh
 export EXO_SCRIPT := $(THEOS_JAILED_BIN)/exo.sh
 export UPDATE_SCRIPT := $(THEOS_JAILED_BIN)/update
-export _SHOW_ERRORS = $(call __theos_bool,$(SHOW_ERRORS))
 
 # Directories
 export RESOURCES_DIR ?= Resources
