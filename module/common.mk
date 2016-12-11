@@ -27,6 +27,7 @@ export OUTPUT_NAME = $(TWEAK_NAME)$(_THEOS_INTERNAL_PACKAGE_VERSION).ipa
 # Codesigning
 export DEV_CERT_NAME ?= iPhone Developer
 export PROFILE ?= *
+export _CODESIGN_IPA = $(call __theos_bool,$(or $(CODESIGN_IPA),$(_THEOS_TRUE)))
 
 # Cycript
 export USE_CYCRIPT = $(call __theos_bool,$(or $($(TWEAK_NAME)_USE_CYCRIPT),$(DEBUG)))

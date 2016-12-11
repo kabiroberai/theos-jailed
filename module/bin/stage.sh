@@ -2,20 +2,6 @@
 
 source "$MESSAGES"
 
-codesign_name=$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")
-
-if [[ $? != 0 ]]; then
-	error "Failed to get codesign name"
-fi
-
-if [[ ! -r $PROFILE ]]; then
-	bundleprofile=$(grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1)
-	if [[ ! -r $bundleprofile ]]; then
-		error "Failed to find profile for '$PROFILE'"
-	fi
-	PROFILE="$bundleprofile"
-fi
-
 if [[ ! -r $IPA ]]; then
 	error "\"$IPA\" not found or not readable"
 fi

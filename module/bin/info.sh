@@ -10,9 +10,9 @@ b=$(tput bold)
 n=$'\n'
 function add { capabilities="$capabilities$n>>> $b$1$r"; }
 
-entitlements=$(codesign -d --entitlements - "$appdir/$app_binary" 2>/dev/null)
+entitlements=$(codesign -d --entitlements - "$appdir" 2>/dev/null)
 if [[ $? != 0 ]]; then
-	error "Failed to get entitlements for $appdir/$app_binary"
+	error "Failed to get entitlements for $app"
 fi
 
 for ent in $(echo "$entitlements" | grep "<key>"); do

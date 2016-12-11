@@ -2,7 +2,6 @@
 
 source "$STAGE"
 
-# copy resources into the .app folder
 if [[ -d $RESOURCES_DIR ]]; then
 	log 2 "Copying resources"
 	rsync -a "$RESOURCES_DIR"/ "$appdir" --exclude "/Info.plist"
@@ -14,7 +13,6 @@ if [[ -d $RESOURCES_DIR ]]; then
 	fi
 fi
 
-# copy .dylib files
 log 2 "Copying dependencies"
 inject_files=("$DYLIB" $ADDITIONAL_DYLIBS)
 [[ $USE_CYCRIPT = 1 ]] && inject_files+=("$CYCRIPT")
@@ -26,7 +24,6 @@ for file in "${inject_files[@]}" "${copy_files[@]}"; do
 	cp -a "$file" "$appdir/$COPY_PATH"
 done
 
-# inject the tweak .dylib and optionally Cycript
 log 3 "Injecting dependencies"
 app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$appdir/Info.plist")"
 install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary" &>/dev/null
@@ -37,24 +34,42 @@ for file in "${inject_files[@]}"; do
 	fi
 done
 
-# re-sign dependencies and the .app
-log 4 "Signing $app"
-entitlements=$(/usr/libexec/PlistBuddy -x -c "Print :Entitlements" /dev/stdin <<< $(security cms -Di "$PROFILE" 2>/dev/null))
-if [[ $? != 0 ]]; then
-	error "Failed to generate entitlements"
+if [[ $_CODESIGN_IPA = 1 ]]; then
+	log 4 "Signing $app"
+	codesign_name=$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")
+	if [[ $? != 0 ]]; then
+		error "Failed to get codesign name"
+	fi
+	
+	if [[ ! -r $PROFILE ]]; then
+		bundleprofile=$(grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1)
+		if [[ ! -r $bundleprofile ]]; then
+			error "Failed to find profile for '$PROFILE'"
+		fi
+		PROFILE="$bundleprofile"
+	fi
+	
+	profile=$(security cms -Di "$PROFILE" 2>/dev/null)
+	if [[ $? != 0 ]]; then
+		error "Failed to generate entitlements"
+	fi
+	
+	entitlements=$(/usr/libexec/PlistBuddy -x -c "Print :Entitlements" /dev/stdin <<< "$profile")
+	if [[ $? != 0 ]]; then
+		error "Failed to generate entitlements"
+	fi
+	
+	find "$appdir" \( -name "*.framework" -or -name "*.dylib" \) -not -path "*.framework/*" -print0 | xargs -0 codesign -fs "$codesign_name" &>/dev/null
+	if [[ $? != 0 ]]; then
+		error "Codesign failed"
+	fi
+	
+	codesign -fs "$codesign_name" --deep --entitlements /dev/stdin "$appdir" &>/dev/null <<< "$entitlements"
+	if [[ $? != 0 ]]; then
+		error "Failed to sign $app"
+	fi
 fi
 
-find "$appdir" \( -name "*.framework" -or -name "*.dylib" \) -not -path "*.framework/*" -print0 | xargs -0 codesign -fs "$codesign_name" &>/dev/null
-if [[ $? != 0 ]]; then
-	error "Codesign failed"
-fi
-
-codesign -fs "$codesign_name" --deep --entitlements /dev/stdin "$appdir" &>/dev/null <<< "$entitlements"
-if [[ $? != 0 ]]; then
-	error "Failed to sign $app"
-fi
-
-# repack the .ipa
 log 4 "Repacking $app"
 cd "$STAGING_DIR"
 zip -r$COMPRESSION "$OUTPUT_NAME" Payload/ &>/dev/null
