@@ -8,7 +8,7 @@ if [[ -d $RESOURCES_DIR ]]; then
 	if [[ -f "$RESOURCES_DIR/Info.plist" ]]; then
 		log 2 "Merging Info.plist"
 		cp "$RESOURCES_DIR/Info.plist" "$STAGING_DIR"
-		/usr/libexec/PlistBuddy -c "Merge $appdir/Info.plist" "$STAGING_DIR/Info.plist" &>/dev/null
+		/usr/libexec/PlistBuddy -c "Merge $appdir/Info.plist" "$STAGING_DIR/Info.plist"
 		mv "$STAGING_DIR/Info.plist" "$appdir"
 	fi
 fi
@@ -26,9 +26,9 @@ done
 
 log 3 "Injecting dependencies"
 app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$appdir/Info.plist")"
-install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary" &>/dev/null
+install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary"
 for file in "${inject_files[@]}"; do
-	"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary" &>/dev/null
+	"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary"
 	if [[ $? != 0 ]]; then
 		error "Failed to inject $(basename "$file") into $app"
 	fi
@@ -49,7 +49,7 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 		PROFILE="$bundleprofile"
 	fi
 	
-	profile=$(security cms -Di "$PROFILE" 2>/dev/null)
+	profile=$(security cms -Di "$PROFILE")
 	if [[ $? != 0 ]]; then
 		error "Failed to generate entitlements"
 	fi
@@ -59,12 +59,12 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 		error "Failed to generate entitlements"
 	fi
 	
-	find "$appdir" \( -name "*.framework" -or -name "*.dylib" \) -not -path "*.framework/*" -print0 | xargs -0 codesign -fs "$codesign_name" &>/dev/null
+	find "$appdir" \( -name "*.framework" -or -name "*.dylib" \) -not -path "*.framework/*" -print0 | xargs -0 codesign -fs "$codesign_name"
 	if [[ $? != 0 ]]; then
 		error "Codesign failed"
 	fi
 	
-	codesign -fs "$codesign_name" --deep --entitlements /dev/stdin "$appdir" &>/dev/null <<< "$entitlements"
+	codesign -fs "$codesign_name" --deep --entitlements /dev/stdin "$appdir" <<< "$entitlements"
 	if [[ $? != 0 ]]; then
 		error "Failed to sign $app"
 	fi
@@ -72,9 +72,9 @@ fi
 
 log 4 "Repacking $app"
 cd "$STAGING_DIR"
-zip -r$COMPRESSION "$OUTPUT_NAME" Payload/ &>/dev/null
+zip -qr$COMPRESSION "$OUTPUT_NAME" Payload/
 if [[ $? != 0 ]]; then
 	error "Failed to repack $app"
 fi
-rm -f "$PACKAGES_DIR"/*.ipa &>/dev/null
+rm -f "$PACKAGES_DIR"/*.ipa
 mv "$OUTPUT_NAME" "$PACKAGES_DIR/"

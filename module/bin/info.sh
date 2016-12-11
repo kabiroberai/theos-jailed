@@ -10,7 +10,7 @@ b=$(tput bold)
 n=$'\n'
 function add { capabilities="$capabilities$n>>> $b$1$r"; }
 
-entitlements=$(codesign -d --entitlements - "$appdir" 2>/dev/null)
+entitlements=$(codesign -d --entitlements - "$appdir")
 if [[ $? != 0 ]]; then
 	error "Failed to get entitlements for $app"
 fi
@@ -48,4 +48,4 @@ $capabilities
 ENT)$n"
 fi
 
-eval "less -R <<EOF$n$(<$INFO_TEMPLATE)"
+eval "less -R 1>&3 <<EOF$n$(<$INFO_TEMPLATE)"

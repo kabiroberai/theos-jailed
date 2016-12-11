@@ -16,9 +16,9 @@ fi
 
 log 2 "Merging $EXO_OUTPUT_NAME"
 cd "$STAGING_DIR"
-zip -9r "$EXO_OUTPUT_NAME" "$TWEAK_NAME" &>/dev/null
+zip -qr$COMPRESSION "$EXO_OUTPUT_NAME" "$TWEAK_NAME"
 if [[ $? != 0 ]]; then
 	error "Failed to compress $EXO_OUTPUT_NAME"
 fi
-rm -f "$PACKAGES_DIR/$OUTPUT_NAME" &>/dev/null
+rm -f "$PACKAGES_DIR/$OUTPUT_NAME"
 mv "$EXO_OUTPUT_NAME" "$PACKAGES_DIR/"
