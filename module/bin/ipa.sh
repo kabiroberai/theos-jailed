@@ -59,7 +59,7 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 		error "Failed to generate entitlements"
 	fi
 	
-	find "$appdir" \( -name "*.framework" -or -name "*.dylib" \) -not -path "*.framework/*" -print0 | xargs -0 codesign -fs "$codesign_name"
+	find "$appdir" \( -name "*.framework" -or -name "*.dylib" -or -name "*.appex" \) -not -path "*.framework/*" -print0 | xargs -0 codesign -fs "$codesign_name"
 	if [[ $? != 0 ]]; then
 		error "Codesign failed"
 	fi
