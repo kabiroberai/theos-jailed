@@ -72,7 +72,7 @@ fi
 
 log 4 "Repacking $app"
 cd "$STAGING_DIR"
-zip -qr$COMPRESSION "$OUTPUT_NAME" Payload/
+zip -yqr$COMPRESSION "$OUTPUT_NAME" Payload/
 if [[ $? != 0 ]]; then
 	error "Failed to repack $app"
 fi
