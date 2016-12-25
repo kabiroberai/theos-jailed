@@ -19,3 +19,5 @@ appdir="$STAGING_DIR/Payload/$app"
 if [[ ! -d $appdir ]]; then
 	error "\"$(basename "$IPA")\" does not contain an application"
 fi
+
+info_plist="$appdir/Info.plist"

@@ -5,12 +5,24 @@ source "$STAGE"
 if [[ -d $RESOURCES_DIR ]]; then
 	log 2 "Copying resources"
 	rsync -a "$RESOURCES_DIR"/ "$appdir" --exclude "/Info.plist"
-	if [[ -f "$RESOURCES_DIR/Info.plist" ]]; then
-		log 2 "Merging Info.plist"
-		cp "$RESOURCES_DIR/Info.plist" "$STAGING_DIR"
-		/usr/libexec/PlistBuddy -c "Merge $appdir/Info.plist" "$STAGING_DIR/Info.plist"
-		mv "$STAGING_DIR/Info.plist" "$appdir"
-	fi
+fi
+
+if [[ -n $BUNDLE_ID ]]; then
+	log 2 "Setting bundle ID"
+	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$info_plist"
+fi
+
+if [[ -n $DISPLAY_NAME ]]; then
+	log 2 "Setting display name"
+	/usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string" "$info_plist" 
+	/usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName $DISPLAY_NAME" "$info_plist" 
+fi
+
+if [[ -f $RESOURCES_DIR/Info.plist ]]; then
+	log 2 "Merging Info.plist"
+	cp "$RESOURCES_DIR/Info.plist" "$STAGING_DIR"
+	/usr/libexec/PlistBuddy -c "Merge $info_plist" "$STAGING_DIR/Info.plist"
+	mv "$STAGING_DIR/Info.plist" "$appdir"
 fi
 
 log 2 "Copying dependencies"
@@ -25,7 +37,7 @@ for file in "${inject_files[@]}" "${copy_files[@]}"; do
 done
 
 log 3 "Injecting dependencies"
-app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$appdir/Info.plist")"
+app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$info_plist")"
 install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary"
 for file in "${inject_files[@]}"; do
 	"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary"

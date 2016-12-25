@@ -9,42 +9,41 @@
 =====================================
 = Creating the provisioning profile =
 =====================================
-${b}Note$r: This only needs to be done once per app.
-1. Open up Xcode, and create a new project.
-2. Select ${b}iOS$r, followed by ${b}Single View Application$r, and then ${b}Next$r.
-3. For ${b}Product Name$r use $b$product_name$r.
-4. For ${b}Organization Identifier$r use com.<unique-string>.
-   Replace <unique-string> with your name without spaces, or something similar.
-5. Click ${b}Next$r, and then choose a location to save the project.
+${b}Note$r: This only needs to be done once per app. You can skip this step
+      if you have a wildcard profile.
+1. Open up Xcode, and create a new project
+2. Select ${b}iOS$r, followed by ${b}Single View Application$r, and then ${b}Next
+3. For ${b}Product Name$r use $b$product_name$r
+4. For ${b}Organization Identifier$r use $b$organization_identifier
+5. Click ${b}Next$r, and then choose a location to save the project. Uncheck 
+   ${b}Create Git repository$r before clicking ${b}Create
 6. Plug in your device, and change ${b}Generic iOS Device$r in the toolbar to your 
-   device's name. Ignore any warnings, we'll fix them later.
-7. Select $b$product_name$r (the topmost item) in Xcode's sidebar.
-8. Similarly, choose ${b}$product_name$r under ${b}Targets$r, and select the ${b}General$r tab.
-9. Set ${b}Deployment Target$r in ${b}Deployment Info$r to your device's version.
-10. Under ${b}Signing$r, change ${b}Team$r to your Apple ID.
+   device's name. Ignore any warnings, we'll fix them later
+7. Set ${b}Deployment Target$r in ${b}Deployment Info$r to your device's version
+8. Under ${b}Signing$r, change ${b}Team$r to your Apple ID
     ${b}Note$r: Select ${b}Add an Account$r if you don't see your Apple ID.
-11. Click ${b}Fix Issue$r if it says ${b}No matching provisioning profiles found$r.
+9. Click ${b}Fix Issue$r if it says ${b}No matching provisioning profiles found$r
+10. Change your ${b}Bundle Identifier$r under ${b}Identity$r if Xcode complains that
+    the app ID $b$BUNDLE_ID$r cannot be registered
 $capabilities
 ====================================
 = Install the provisioning profile =
 ====================================
+${delete_app}1. Press the ${b}Run$r button in Xcode's toolbar to install the temporary app 
+   onto your device.
+2. Delete the temporary app from your device once it loads.
+3. Quit Xcode.
 ${b}Note$r: This only needs to be done once per app.
-1. Delete any existing copies of the app from your device. 
-   ${b}Note$r: You can't install over the top of the real application,
-         so it must be deleted first.
-2. Press the ${b}Run$r button in Xcode's toolbar to install the temporary app onto your device.
-3. Delete the temporary app from your device once it loads.
-4. Quit Xcode.
 
 =========================================
 = Installing the tweak using ios-deploy =
 =========================================
-1. Run "make package install PROFILE=com.${b}your-unique-string$r.$product_name"
-   ${b}Note$r: If you omit the "PROFILE=..." part, the script will try to use
-         Xcode's iOS Wildcard App ID. If you are enrolled in the Apple
-         Developer Program, you may skip creating the profile and use
-         this instead.
-2. If you get an error during installation, use the following method.
+1. Run ${b}make package install PROFILE=$BUNDLE_ID$r. If you set 
+   a custom bundle ID, use that instead of $b$BUNDLE_ID
+   ${b}Note$r: If you omit the ${b}PROFILE=…$r part, the script will try to use
+         Xcode's iOS Wildcard App ID. This will only work if you are enrolled
+         in the Apple Developer Program.
+2. If you get an error during installation, use the following method:
 
 ====================================
 = Installing the tweak using Xcode =
@@ -52,4 +51,4 @@ ${b}Note$r: This only needs to be done once per app.
 1. In Xcode goto Window / Devices
 2. Under ${b}Installed Apps$r click the + button
 3. Choose the patched .ipa file and cross your fingers
-4. The patched app should appear on your device.
+4. The patched app should appear on your device

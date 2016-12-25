@@ -2,8 +2,16 @@
 
 source "$STAGE"
 
-bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$appdir/Info.plist")
-product_name="${bundle_id##*.}"
+if [[ -z $BUNDLE_ID ]]; then
+	BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$info_plist")
+	delete_app="$(cat <<ENT
+${b}Note$r: Since you do not wish to change the bundle ID of the target app, 
+      you must delete the original before installing the tweak.
+ENT)$n"
+fi
+
+organization_identifier="${BUNDLE_ID%.*}"
+product_name="${BUNDLE_ID##*.}"
 
 r=$(tput sgr0)
 b=$(tput bold)
@@ -42,8 +50,8 @@ done
 
 if [[ -n $capabilities ]]; then
 	capabilities="$(cat <<ENT
-12. Select the ${b}Capabilities$r tab to the right of ${b}General$r.
-13. Enable the following capabilities (ignore any that give you an error):
+11. Select the ${b}Capabilities$r tab to the right of ${b}General
+12. Enable the following capabilities (ignore any that give you an error):
 $capabilities
 ENT)$n"
 fi
