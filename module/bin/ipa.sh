@@ -7,8 +7,17 @@ if [[ -d $RESOURCES_DIR ]]; then
 	rsync -a "$RESOURCES_DIR"/ "$appdir" --exclude "/Info.plist"
 fi
 
+function change_bundle_id {
+	ext_bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$1")
+	app_bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$info_plist")
+	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID${ext_bundle_id#$app_bundle_id}" "$1"
+}
+
 if [[ -n $BUNDLE_ID ]]; then
 	log 2 "Setting bundle ID"
+	export -f change_bundle_id
+	export info_plist
+	find "$appdir" -name "*.appex" -print0 | xargs -I {} -0 bash -c "change_bundle_id '{}/Info.plist'" \;
 	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$info_plist"
 fi
 
@@ -47,6 +56,8 @@ for file in "${inject_files[@]}"; do
 	fi
 done
 
+chmod +x "$app_binary"
+
 if [[ $_CODESIGN_IPA = 1 ]]; then
 	log 4 "Signing $app"
 	codesign_name=$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")
@@ -62,6 +73,8 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 		PROFILE="$bundleprofile"
 	fi
 	
+	cp "$PROFILE" "$appdir/embedded.mobileprovision"
+
 	profile=$(security cms -Di "$PROFILE")
 	if [[ $? != 0 ]]; then
 		error "Failed to generate entitlements"
