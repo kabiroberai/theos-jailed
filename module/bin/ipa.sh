@@ -26,7 +26,8 @@ if [[ -f $RESOURCES_DIR/Info.plist ]]; then
 fi
 
 log 2 "Copying dependencies"
-inject_files=("$DYLIB" $ADDITIONAL_DYLIBS)
+inject_files=("$DYLIB" $INJECT_DYLIBS)
+copy_files=($EMBED_FRAMEWORKS $EMBED_LIBRARIES)
 [[ $USE_CYCRIPT = 1 ]] && inject_files+=("$CYCRIPT")
 [[ $USE_FLEX = 1 ]] && inject_files+=("$FLEX")
 [[ $USE_SUBSTRATE = 1 ]] && copy_files+=("$SUBSTRATE")
