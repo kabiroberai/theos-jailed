@@ -6,7 +6,7 @@ regex_info="\[\.\.\.\.] (.*)"
 regex_percent="\[ *([0-9]+)%\].*"
 regex_error='.*\[ !! \] (.*)'
 
-ios-deploy -LWb "$appdir" 2>&1 | while read -r line; do
+ios-deploy $RELAUNCH_FLAG -LWb "$appdir" 2>&1 | while read -r line; do
 	if [[ $_THEOS_VERBOSE = 1 ]]; then
 		echo "$line"
 	elif [[ $line =~ $regex_info ]]; then

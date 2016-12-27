@@ -15,3 +15,8 @@ ifeq ($(call __executable,ghost),$(_THEOS_TRUE))
 else
 	@$(PRINT_FORMAT_ERROR) "You don't have ghost installed. For more information, refer to https://github.com/theos/theos/wiki/Installation#prerequisites." >&2; exit 1
 endif
+
+relaunch:: internal-relaunch install
+
+internal-relaunch::
+	$(eval export RELAUNCH_FLAG = -m)
