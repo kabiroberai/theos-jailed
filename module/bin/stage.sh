@@ -21,3 +21,4 @@ if [[ ! -d $appdir ]]; then
 fi
 
 info_plist="$appdir/Info.plist"
+app_bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$info_plist")

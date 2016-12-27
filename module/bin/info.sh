@@ -3,10 +3,11 @@
 source "$STAGE"
 
 if [[ -z $BUNDLE_ID ]]; then
-	BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$info_plist")
+	BUNDLE_ID="$app_bundle_id"
 	delete_app="$(cat <<ENT
 ${b}Note$r: Since you do not wish to change the bundle ID of the target app, 
-      you must delete the original before installing the tweak.
+      you must delete the original before installing the tweak. This will only
+      work if you use a wildcard profile.
 ENT)$n"
 fi
 

@@ -8,16 +8,15 @@ if [[ -d $RESOURCES_DIR ]]; then
 fi
 
 function change_bundle_id {
-	ext_bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$1")
-	app_bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$info_plist")
-	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID${ext_bundle_id#$app_bundle_id}" "$1"
+	bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$1")
+	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID${bundle_id#$app_bundle_id}" "$1"
 }
 
 if [[ -n $BUNDLE_ID ]]; then
 	log 2 "Setting bundle ID"
 	export -f change_bundle_id
-	export info_plist
-	find "$appdir" -name "*.appex" -print0 | xargs -I {} -0 bash -c "change_bundle_id '{}/Info.plist'" \;
+	export app_bundle_id
+	find "$appdir" -name "*.appex" -print0 | xargs -I {} -0 bash -c "change_bundle_id '{}/Info.plist'"
 	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$info_plist"
 fi
 
@@ -60,27 +59,32 @@ chmod +x "$app_binary"
 
 if [[ $_CODESIGN_IPA = 1 ]]; then
 	log 4 "Signing $app"
-	codesign_name=$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")
-	if [[ $? != 0 ]]; then
-		error "Failed to get codesign name"
-	fi
-	
+
 	if [[ ! -r $PROFILE ]]; then
 		bundleprofile=$(grep -Fl "<string>iOS Team Provisioning Profile: $PROFILE</string>" ~/Library/MobileDevice/Provisioning\ Profiles/* | head -1)
 		if [[ ! -r $bundleprofile ]]; then
-			error "Failed to find profile for '$PROFILE'"
+			error "Could not find profile '$PROFILE'"
 		fi
 		PROFILE="$bundleprofile"
 	fi
-	
+
 	cp "$PROFILE" "$appdir/embedded.mobileprovision"
 
-	profile=$(security cms -Di "$PROFILE")
+	security cms -Di "$PROFILE" > "$PROFILE_FILE"
 	if [[ $? != 0 ]]; then
 		error "Failed to generate entitlements"
 	fi
-	
-	entitlements=$(/usr/libexec/PlistBuddy -x -c "Print :Entitlements" /dev/stdin <<< "$profile")
+
+	if [[ -n $DEV_CERT_NAME ]]; then
+		codesign_name=$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")
+	else
+		codesign_name=$(/usr/libexec/PlistBuddy -c "Print :DeveloperCertificates:0" "$PROFILE_FILE" | grep -ao "iPhone Developer: .* (.*)")
+	fi
+	if [[ -z $codesign_name ]]; then
+		error "Failed to get codesign name"
+	fi
+
+	/usr/libexec/PlistBuddy -x -c "Print :Entitlements" "$PROFILE_FILE" > "$ENTITLEMENTS"
 	if [[ $? != 0 ]]; then
 		error "Failed to generate entitlements"
 	fi
@@ -90,7 +94,7 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 		error "Codesign failed"
 	fi
 	
-	codesign -fs "$codesign_name" --deep --entitlements /dev/stdin "$appdir" <<< "$entitlements"
+	codesign -fs "$codesign_name" --deep --entitlements "$ENTITLEMENTS" "$appdir"
 	if [[ $? != 0 ]]; then
 		error "Failed to sign $app"
 	fi
