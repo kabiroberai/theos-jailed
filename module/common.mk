@@ -16,8 +16,8 @@ export UPDATE_SCRIPT := $(THEOS_JAILED_BIN)/update
 
 # Directories
 export RESOURCES_DIR ?= Resources
-export STAGING_DIR := $(THEOS_STAGING_DIR)
-export PACKAGES_DIR := $(THEOS_PROJECT_DIR)/$(THEOS_PACKAGE_DIR_NAME)
+export STAGING_DIR = $(THEOS_STAGING_DIR)
+export PACKAGES_DIR = $(THEOS_PROJECT_DIR)/$(THEOS_PACKAGE_DIR)
 
 # Resources
 export COPY_PATH ?= Frameworks
