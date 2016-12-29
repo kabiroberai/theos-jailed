@@ -21,6 +21,7 @@ echo "Successfully installed module."
 # Install template
 "$THEOS/bin/nicify.pl" template 2> /dev/null || error "Failed to nicify template"
 mkdir -p "$TEMPLATE_PATH"
+rm -rf "$TEMPLATE_PATH"/*
 mv *.nic.tar "$TEMPLATE_PATH/jailed.nic.tar"
 echo "*" > "$TEMPLATE_PATH/.gitignore"
 echo "Successfully installed template."
