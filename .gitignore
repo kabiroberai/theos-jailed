@@ -1,4 +1,5 @@
 module/bin/update
+module/lib/CydiaSubstrate*.framework
 
 addons/*/.theos
 addons/*/obj

@@ -39,6 +39,7 @@ copy_files=($EMBED_FRAMEWORKS $EMBED_LIBRARIES)
 [[ $USE_CYCRIPT = 1 ]] && inject_files+=("$CYCRIPT")
 [[ $USE_FLEX = 1 ]] && inject_files+=("$FLEX")
 [[ $USE_SUBSTRATE = 1 ]] && copy_files+=("$SUBSTRATE")
+install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$DYLIB"
 
 mkdir -p "$appdir/$COPY_PATH"
 for file in "${inject_files[@]}" "${copy_files[@]}"; do

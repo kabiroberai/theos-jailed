@@ -1,6 +1,3 @@
-# Add jailed/lib to THEOS_LIBRARY_PATH to override stub CydiaSubstrate
-THEOS_LIBRARY_PATH += -F$(THEOS_JAILED_LIB)
-
 _THEOS_INTERNAL_CFLAGS += -F.
 # Use libc++ by default - for libstdc++ use TWEAK_NAME_LDFLAGS = -stdlib=libstdc++
 _THEOS_INTERNAL_LDFLAGS += -F. -L. -stdlib=libc++

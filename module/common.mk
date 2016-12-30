@@ -45,6 +45,8 @@ export FLEX ?= $(THEOS_JAILED_LIB)/FLEX.dylib
 # CydiaSubstrate
 export USE_SUBSTRATE = $(call __theos_bool,$(or $($(TWEAK_NAME)_USE_SUBSTRATE),$(_THEOS_TARGET_DEFAULT_USE_SUBSTRATE),$(_THEOS_TRUE)))
 export SUBSTRATE ?= $(THEOS_JAILED_LIB)/CydiaSubstrate.framework
+export STUB_SUBSTRATE_INSTALL_PATH = /Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate
+export SUBSTRATE_INSTALL_PATH = @rpath/CydiaSubstrate.framework/CydiaSubstrate
 
 # Extensify Exo
 export EXO_STAGING_DIR = $(STAGING_DIR)/$(TWEAK_NAME)
