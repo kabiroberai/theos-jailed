@@ -21,7 +21,9 @@ if [[ ! -d module/$SUBSTRATE ]]; then
 	tar --lzma --strip-components 3 -xf data.tar.lzma "$SUBSTRATE_PATH"
 	rm -rf substrate.deb data.tar.lzma module/lib/CydiaSubstrate*.framework
 	mv CydiaSubstrate.framework "module/$SUBSTRATE"
-	echo "Successfully downloaded CydiaSubstrate.framework"
+	plutil -convert xml1 "module/$SUBSTRATE/Info.plist"
+	rm -f "module/$SUBSTRATE/Libraries/SubstrateInjection.dylib"
+	echo "Successfully installed CydiaSubstrate.framework"
 fi
 
 # Install module
