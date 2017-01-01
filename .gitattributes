@@ -1,1 +1,2 @@
-module/lib/* linguist-vendored
+module/lib linguist-vendored
+addons/cycript/Cycript.framework linguist-vendored
