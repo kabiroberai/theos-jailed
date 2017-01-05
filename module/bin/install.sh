@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source "$STAGE"
+source "$MESSAGES"
+appdir=("$STAGING_DIR/Payload"/*.app)
 
 regex_info="\[\.\.\.\.] (.*)"
 regex_percent="\[ *([0-9]+)%\].*"
