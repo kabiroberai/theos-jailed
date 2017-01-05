@@ -2,6 +2,11 @@
 
 source "$STAGE"
 
+r=$(tput sgr0)
+b=$(tput bold)
+n=$'\n'
+function add { capabilities="$capabilities$n>>> $b$1$r"; }
+
 if [[ -z $BUNDLE_ID ]]; then
 	BUNDLE_ID="$app_bundle_id"
 	delete_app="$(cat <<ENT
@@ -13,11 +18,6 @@ fi
 
 organization_identifier="${BUNDLE_ID%.*}"
 product_name="${BUNDLE_ID##*.}"
-
-r=$(tput sgr0)
-b=$(tput bold)
-n=$'\n'
-function add { capabilities="$capabilities$n>>> $b$1$r"; }
 
 entitlements=$(codesign -d --entitlements - "$appdir")
 if [[ $? != 0 ]]; then

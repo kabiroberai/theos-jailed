@@ -23,8 +23,9 @@ ${b}Note$r: This only needs to be done once per app. You can skip this step
 8. Under ${b}Signing$r, change ${b}Team$r to your Apple ID
     ${b}Note$r: Select ${b}Add an Account$r if you don't see your Apple ID.
 9. Click ${b}Fix Issue$r if it says ${b}No matching provisioning profiles found$r
-10. Change your ${b}Bundle Identifier$r under ${b}Identity$r if Xcode complains that
-    the app ID $b$BUNDLE_ID$r cannot be registered
+10. If Xcode complains that the app ID $b$BUNDLE_ID$r cannot be 
+    registered, change your ${b}Bundle Identifier$r under ${b}Identity$r and update the
+    ${b}BUNDLE_ID$r variable in Makefile
 $capabilities
 ====================================
 = Install the provisioning profile =
@@ -38,8 +39,7 @@ ${b}Note$r: This only needs to be done once per app.
 =========================================
 = Installing the tweak using ios-deploy =
 =========================================
-1. Run ${b}make package install PROFILE=$BUNDLE_ID$r. If you set 
-   a custom bundle ID, use that instead of $b$BUNDLE_ID
+1. Run ${b}make package install PROFILE=$BUNDLE_ID
    ${b}Note$r: If you omit the ${b}PROFILE=…$r part, the script will try to use
          Xcode's iOS Wildcard App ID. This will only work if you are enrolled
          in the Apple Developer Program.
