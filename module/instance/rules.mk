@@ -1,4 +1,4 @@
-_THEOS_INTERNAL_CFLAGS += -F.
+_THEOS_INTERNAL_CFLAGS += -DSIDELOAD -F.
 # Use libc++ by default - for libstdc++ use TWEAK_NAME_LDFLAGS = -stdlib=libstdc++
 _THEOS_INTERNAL_LDFLAGS += -F. -L. -stdlib=libc++
 
