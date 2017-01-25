@@ -69,7 +69,9 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 		PROFILE="$bundleprofile"
 	fi
 
-	cp "$PROFILE" "$appdir/embedded.mobileprovision"
+	if [[ $_EMBED_PROFILE = 1 ]]; then
+		cp "$PROFILE" "$appdir/embedded.mobileprovision"
+	fi
 
 	security cms -Di "$PROFILE" -o "$PROFILE_FILE"
 	if [[ $? != 0 ]]; then

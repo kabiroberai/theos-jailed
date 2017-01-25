@@ -33,6 +33,7 @@ export PROFILE ?= *
 export PROFILE_FILE = $(STAGING_DIR)/profile.plist
 export ENTITLEMENTS = $(STAGING_DIR)/entitlements.plist
 export _CODESIGN_IPA = $(call __theos_bool,$(or $(CODESIGN_IPA),$(_THEOS_TRUE)))
+export _EMBED_PROFILE = $(call __theos_bool,$(or $(EMBED_PROFILE),$(_THEOS_TRUE)))
 
 # Cycript
 export USE_CYCRIPT = $(call __theos_bool,$(or $($(TWEAK_NAME)_USE_CYCRIPT),$(DEBUG)))
