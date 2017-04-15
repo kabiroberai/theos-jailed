@@ -22,9 +22,6 @@ prefix=$(uuidgen)
 prefix="${prefix::8}"
 
 entitlements=$(codesign -d --entitlements - "$appdir")
-if [[ $? != 0 ]]; then
-	error "Failed to get entitlements for $app"
-fi
 
 for ent in $(echo "$entitlements" | grep "<key>"); do
 	case $(echo "$ent" | cut -f2 -d\> | cut -f1 -d\<) in
