@@ -39,20 +39,22 @@ copy_files=($EMBED_FRAMEWORKS $EMBED_LIBRARIES)
 [[ $USE_CYCRIPT = 1 ]] && inject_files+=("$CYCRIPT")
 [[ $USE_FLEX = 1 ]] && inject_files+=("$FLEX")
 [[ $USE_SUBSTRATE = 1 ]] && copy_files+=("$SUBSTRATE")
-install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$DYLIB"
 
-mkdir -p "$appdir/$COPY_PATH"
+full_copy_path="$appdir/$COPY_PATH"
+mkdir -p "$full_copy_path"
 for file in "${inject_files[@]}" "${copy_files[@]}"; do
-	cp -a "$file" "$appdir/$COPY_PATH"
+	cp -a "$file" "$full_copy_path"
 done
 
 log 3 "Injecting dependencies"
 app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$info_plist")"
 install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary"
 for file in "${inject_files[@]}"; do
+	filename=$(basename "$file")
+	install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$full_copy_path/$filename"
 	"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary"
 	if [[ $? != 0 ]]; then
-		error "Failed to inject $(basename "$file") into $app"
+		error "Failed to inject $filename into $app"
 	fi
 done
 
