@@ -2,9 +2,11 @@
 
 source "$STAGE"
 
+function copy { eval "rsync -a $* $_THEOS_RSYNC_EXCLUDE_COMMANDLINE"; }
+
 if [[ -d $RESOURCES_DIR ]]; then
 	log 2 "Copying resources"
-	rsync -a "$RESOURCES_DIR"/ "$appdir" --exclude "/Info.plist"
+	copy "$RESOURCES_DIR"/ "$appdir" --exclude "/Info.plist"
 fi
 
 function change_bundle_id {
@@ -28,7 +30,7 @@ fi
 
 if [[ -f $RESOURCES_DIR/Info.plist ]]; then
 	log 2 "Merging Info.plist"
-	cp "$RESOURCES_DIR/Info.plist" "$STAGING_DIR"
+	copy "$RESOURCES_DIR/Info.plist" "$STAGING_DIR"
 	/usr/libexec/PlistBuddy -c "Merge $info_plist" "$STAGING_DIR/Info.plist"
 	mv "$STAGING_DIR/Info.plist" "$appdir"
 fi
@@ -43,7 +45,7 @@ copy_files=($EMBED_FRAMEWORKS $EMBED_LIBRARIES)
 full_copy_path="$appdir/$COPY_PATH"
 mkdir -p "$full_copy_path"
 for file in "${inject_files[@]}" "${copy_files[@]}"; do
-	cp -a "$file" "$full_copy_path"
+	copy "$file" "$full_copy_path"
 done
 
 log 3 "Injecting dependencies"
@@ -72,7 +74,7 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 	fi
 
 	if [[ $_EMBED_PROFILE = 1 ]]; then
-		cp "$PROFILE" "$appdir/embedded.mobileprovision"
+		copy "$PROFILE" "$appdir/embedded.mobileprovision"
 	fi
 
 	security cms -Di "$PROFILE" -o "$PROFILE_FILE"
