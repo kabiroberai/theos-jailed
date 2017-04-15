@@ -36,7 +36,7 @@ ${b}Note$r: This only needs to be done once per app.
 =========================================
 = Installing the tweak using ios-deploy =
 =========================================
-1. Run ${b}make package install PROFILE=$BUNDLE_ID
+1. Run ${b}make package install PROFILE=$prefix.$BUNDLE_ID
    ${b}Note$r: If you omit the ${b}PROFILE=…$r part, the script will try to use
          Xcode's iOS Wildcard App ID. This will only work if you are enrolled
          in the Apple Developer Program.
