@@ -19,7 +19,7 @@ fi
 organization_identifier="${BUNDLE_ID%.*}"
 product_name="${BUNDLE_ID##*.}"
 prefix=$(uuidgen)
-prefix="${prefix::8}"
+prefix="ID-${prefix::8}"
 
 entitlements=$(codesign -d --entitlements - "$appdir")
 
