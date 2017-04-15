@@ -18,6 +18,8 @@ fi
 
 organization_identifier="${BUNDLE_ID%.*}"
 product_name="${BUNDLE_ID##*.}"
+prefix=$(uuidgen)
+prefix="${prefix::8}"
 
 entitlements=$(codesign -d --entitlements - "$appdir")
 if [[ $? != 0 ]]; then
@@ -51,8 +53,8 @@ done
 
 if [[ -n $capabilities ]]; then
 	capabilities="$(cat <<ENT
-11. Select the ${b}Capabilities$r tab to the right of ${b}General
-12. Enable the following capabilities (ignore any that give you an error):
+10. Select the ${b}Capabilities$r tab to the right of ${b}General
+11. Enable the following capabilities (ignore any that give you an error):
 $capabilities
 ENT)$n"
 fi

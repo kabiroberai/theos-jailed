@@ -14,7 +14,7 @@ ${b}Note$r: This only needs to be done once per app. You can skip this step
 1. Open up Xcode, and create a new project
 2. Select ${b}iOS$r, followed by ${b}Single View Application$r, and then ${b}Next
 3. For ${b}Product Name$r use $b$product_name$r
-4. For ${b}Organization Identifier$r use $b$organization_identifier
+4. For ${b}Organization Identifier$r use $b$prefix.$organization_identifier
 5. Click ${b}Next$r, and then choose a location to save the project. Uncheck 
    ${b}Create Git repository$r before clicking ${b}Create
 6. Plug in your device, and change ${b}Generic iOS Device$r in the toolbar to your 
@@ -22,10 +22,7 @@ ${b}Note$r: This only needs to be done once per app. You can skip this step
 7. Set ${b}Deployment Target$r in ${b}Deployment Info$r to your device's version
 8. Under ${b}Signing$r, change ${b}Team$r to your Apple ID
     ${b}Note$r: Select ${b}Add an Account$r if you don't see your Apple ID.
-9. Click ${b}Fix Issue$r if it says ${b}No matching provisioning profiles found$r
-10. If Xcode complains that the app ID $b$BUNDLE_ID$r cannot be 
-    registered, change your ${b}Bundle Identifier$r under ${b}Identity$r and update the
-    ${b}BUNDLE_ID$r variable in Makefile
+9. Click ${b}Fix Issue$r if it says ${b}No matching provisioning profiles found
 $capabilities
 ====================================
 = Install the provisioning profile =
