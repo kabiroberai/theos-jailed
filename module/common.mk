@@ -43,6 +43,10 @@ export CYCRIPT ?= $(THEOS_JAILED_LIB)/Cycript.dylib
 export USE_FLEX = $(call __theos_bool,$($(TWEAK_NAME)_USE_FLEX))
 export FLEX ?= $(THEOS_JAILED_LIB)/FLEX.dylib
 
+# Overlay
+export USE_OVERLAY = $(call __theos_bool,$($(TWEAK_NAME)_USE_OVERLAY))
+export OVERLAY ?= $(THEOS_JAILED_LIB)/Overlay.dylib
+
 # CydiaSubstrate
 export USE_SUBSTRATE = $(call __theos_bool,$(or $($(TWEAK_NAME)_USE_SUBSTRATE),$(_THEOS_TARGET_DEFAULT_USE_SUBSTRATE),$(_THEOS_TRUE)))
 export SUBSTRATE ?= $(THEOS_JAILED_LIB)/CydiaSubstrate.framework
