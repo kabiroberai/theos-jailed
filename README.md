@@ -7,7 +7,7 @@ To begin developing your first jailed tweak, head over to [Installation](https:/
 ## Features
 
 * Works with the latest and greatest
-    - iOS 10 (should also support previous versions)
+    - iOS 8-11
     - CydiaSubstrate.framework (instead of the outdated libsubstrate.dylib)
 * Functions as a module, so it plugs in to Theos. This means you can always use the latest version of Theos with it
 * Colored terminal output (see [Example output](#example-output))
