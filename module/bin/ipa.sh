@@ -2,7 +2,7 @@
 
 source "$STAGE"
 
-function copy { eval "rsync -a $* $_THEOS_RSYNC_EXCLUDE_COMMANDLINE"; }
+function copy { eval "rsync -s -a \"$1\" \"$2\" $_THEOS_RSYNC_EXCLUDE_COMMANDLINE"; }
 
 if [[ -d $RESOURCES_DIR ]]; then
 	log 2 "Copying resources"
