@@ -2,7 +2,9 @@
 
 source "$STAGE"
 
-function copy { eval "rsync -a $* $_THEOS_RSYNC_EXCLUDE_COMMANDLINE"; }
+function copy { 
+	rsync -a "$@" --exclude _MTN --exclude .git --exclude .svn --exclude .DS_Store --exclude ._*
+}
 
 if [[ -d $RESOURCES_DIR ]]; then
 	log 2 "Copying resources"
@@ -86,7 +88,7 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 	if [[ -n $DEV_CERT_NAME ]]; then
 		codesign_name=$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")
 	else
-		codesign_name=$(/usr/libexec/PlistBuddy -c "Print :DeveloperCertificates:0" "$PROFILE_FILE" | grep -aEo "iPhone Developer: .+ \(.+?\)")
+		codesign_name=$(/usr/libexec/PlistBuddy -c "Print :DeveloperCertificates:0" "$PROFILE_FILE" | grep -aEo "iPhone .+?: .+ \(.+?\)")
 	fi
 	if [[ -z $codesign_name ]]; then
 		error "Failed to get codesign name"

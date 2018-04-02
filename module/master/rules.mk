@@ -1,4 +1,4 @@
-.PHONY: info update-jailed troubleshoot-jailed
+.PHONY: info update-jailed troubleshoot-jailed relaunch internal-relaunch
 
 info::
 	@$(PRINT_FORMAT_MAKING) "Generating info for $$(basename "$$IPA")";"$(INFO_SCRIPT)"
