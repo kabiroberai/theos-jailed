@@ -88,7 +88,8 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 	if [[ -n $DEV_CERT_NAME ]]; then
 		codesign_name=$(security find-certificate -c "$DEV_CERT_NAME" login.keychain | grep alis | cut -f4 -d\" | cut -f1 -d\")
 	else
-		codesign_name=$(/usr/libexec/PlistBuddy -c "Print :DeveloperCertificates:0" "$PROFILE_FILE" | grep -aEo "iPhone .+?: .+ \(.+?\)")
+		# http://maniak-dobrii.com/extracting-stuff-from-provisioning-profile/
+		codesign_name=$(/usr/libexec/PlistBuddy -c "Print :DeveloperCertificates:0" "$PROFILE_FILE" | openssl x509 -noout -inform DER -subject | sed -E 's/^.*CN=([^\/]*)\/.*$/\1/')
 	fi
 	if [[ -z $codesign_name ]]; then
 		error "Failed to get codesign name"
