@@ -6,12 +6,19 @@ if [[ ! -r $IPA ]]; then
 	error "\"$IPA\" not found or not readable"
 fi
 
-log 1 "Unpacking $(basename "$IPA")"
 rm -rf "$STAGING_DIR"
 mkdir -p "$STAGING_DIR"
-unzip -q "$IPA" "Payload/*" -d "$STAGING_DIR"
-if [[ $? != 0 ]]; then
-	error "Failed to unzip \"$IPA\""
+
+if [[ -d "$IPA" ]]; then
+	# probably .app file
+	mkdir -p "$STAGING_DIR/Payload"
+	cp -a "$IPA" "$STAGING_DIR/Payload"
+else
+	log 1 "Unpacking $(basename "$IPA")"
+	unzip -q "$IPA" "Payload/*" -d "$STAGING_DIR"
+	if [[ $? != 0 ]]; then
+		error "Failed to unzip \"$IPA\""
+	fi
 fi
 
 app=$(basename "$STAGING_DIR"/Payload/*.app)

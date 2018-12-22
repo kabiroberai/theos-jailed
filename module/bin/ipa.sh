@@ -111,11 +111,15 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 	fi
 fi
 
-log 4 "Repacking $app"
 cd "$STAGING_DIR"
-zip -yqr$COMPRESSION "$OUTPUT_NAME" Payload/
-if [[ $? != 0 ]]; then
-	error "Failed to repack $app"
+if [[ "${OUTPUT_NAME##*.}" = "app" ]]; then
+	cp -a "$appdir" "$PACKAGES_DIR/$OUTPUT_NAME"
+else
+	log 4 "Repacking $app"
+	zip -yqr$COMPRESSION "$OUTPUT_NAME" Payload/
+	if [[ $? != 0 ]]; then
+		error "Failed to repack $app"
+	fi
+	rm -rf "$PACKAGES_DIR"/*.ipa "$PACKAGES_DIR"/*.app
+	mv "$OUTPUT_NAME" "$PACKAGES_DIR/"
 fi
-rm -f "$PACKAGES_DIR"/*.ipa
-mv "$OUTPUT_NAME" "$PACKAGES_DIR/"

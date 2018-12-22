@@ -1,9 +1,10 @@
 ifeq ($(_THEOS_PACKAGE_FORMAT_LOADED),)
 _THEOS_PACKAGE_FORMAT_LOADED := 1
 
-export COMPRESSION := 1
 ifeq ($(_THEOS_FINAL_PACKAGE),$(_THEOS_TRUE))
-COMPRESSION := 9
+export COMPRESSION ?= 9
+else
+export COMPRESSION ?= 1
 endif
 
 internal-package::
