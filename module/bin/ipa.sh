@@ -43,7 +43,7 @@ copy_files=($EMBED_FRAMEWORKS $EMBED_LIBRARIES)
 [[ $USE_CYCRIPT = 1 ]] && inject_files+=("$CYCRIPT")
 [[ $USE_FLEX = 1 ]] && inject_files+=("$FLEX")
 [[ $USE_OVERLAY = 1 ]] && inject_files+=("$OVERLAY")
-[[ $USE_SUBSTRATE = 1 ]] && copy_files+=("$SUBSTRATE")
+[[ $GENERATOR == "MobileSubstrate" ]] && copy_files+=("$SUBSTRATE")
 
 full_copy_path="$appdir/$COPY_PATH"
 mkdir -p "$full_copy_path"
