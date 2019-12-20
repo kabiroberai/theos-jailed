@@ -1,17 +1,15 @@
 # Theos Jailed
 
-This is a module for Theos designed to work with apps on non-jailbroken iOS devices. For the original (iOS 8/9) theos-jailed, see https://github.com/BishopFox/theos-jailed.
-
 To begin developing your first jailed tweak, head over to [Installation](https://github.com/kabiroberai/theos-jailed/wiki/Installation) in the wiki.
 
 ## Features
 
 * Works with the latest and greatest
-    - iOS 8-11
+    - iOS 8 and up
     - CydiaSubstrate.framework (instead of the outdated libsubstrate.dylib)
 * Functions as a module, so it plugs in to Theos. This means you can always use the latest version of Theos with it
 * Colored terminal output (see [Example output](#example-output))
-* Uses `make package install` instead of `./patchapp.sh` --- just like in jailbroken tweaks
+* Uses `make package install` instead of a shell script --- just like in jailbroken tweaks
 * Improved codesigning
     - You don't need to ever specify `DEV_CERT_NAME`
     - Supports both bundle IDs and .mobileprovision files
@@ -36,3 +34,7 @@ To begin developing your first jailed tweak, head over to [Installation](https:/
 
 ## Example output
 <img src="http://i.imgur.com/zBQY7ec.png" width="750">
+
+## Credits
+
+* [BishopFox](https://github.com/BishopFox/theos-jailed) for the original proof of concept
