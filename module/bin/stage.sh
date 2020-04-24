@@ -28,4 +28,4 @@ if [[ ! -d $appdir ]]; then
 fi
 
 info_plist="$appdir/Info.plist"
-app_bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$info_plist")
+app_bundle_id=$(/bin/bash $THEOS/mod/jailed/bin/readPlist.sh CFBundleIdentifier "$info_plist")

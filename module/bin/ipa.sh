@@ -2,7 +2,7 @@
 
 source "$STAGE"
 
-function copy { 
+function copy {
 	rsync -a "$@" --exclude _MTN --exclude .git --exclude .svn --exclude .DS_Store --exclude ._*
 }
 
@@ -12,8 +12,8 @@ if [[ -d $RESOURCES_DIR ]]; then
 fi
 
 function change_bundle_id {
-	bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$1")
-	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID${bundle_id#$app_bundle_id}" "$1"
+	bundle_id=$(/bin/bash $THEOS/mod/jailed/bin/readPlist.sh "CFBundleIdentifier" "$1")
+	/bin/bash $THEOS/mod/jailed/bin/writePlist.sh CFBundleIdentifier $BUNDLE_ID${bundle_id#$app_bundle_id} "$1"
 }
 
 if [[ -n $BUNDLE_ID ]]; then
@@ -21,13 +21,12 @@ if [[ -n $BUNDLE_ID ]]; then
 	export -f change_bundle_id
 	export app_bundle_id
 	find "$appdir" -name "*.appex" -print0 | xargs -I {} -0 bash -c "change_bundle_id '{}/Info.plist'"
-	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$info_plist"
+	/bin/bash $THEOS/mod/jailed/bin/writePlist.sh CFBundleIdentifier "$BUNDLE_ID" "$info_plist"
 fi
 
 if [[ -n $DISPLAY_NAME ]]; then
 	log 2 "Setting display name"
-	/usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string" "$info_plist" 
-	/usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName $DISPLAY_NAME" "$info_plist" 
+	/bin/bash $THEOS/mod/jailed/bin/writePlist.sh CFBundleDisplayName "$DISPLAY_NAME" "$info_plist"
 fi
 
 if [[ -f $RESOURCES_DIR/Info.plist ]]; then
@@ -52,7 +51,7 @@ for file in "${inject_files[@]}" "${copy_files[@]}"; do
 done
 
 log 3 "Injecting dependencies"
-app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$info_plist")"
+app_binary="$appdir/$(/bin/bash $THEOS/mod/jailed/bin/readPlist.sh "CFBundleExecutable" "$info_plist")"
 install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary"
 for file in "${inject_files[@]}"; do
 	filename=$(basename "$file")
@@ -99,12 +98,12 @@ if [[ $_CODESIGN_IPA = 1 ]]; then
 	if [[ $? != 0 ]]; then
 		error "Failed to generate entitlements"
 	fi
-	
+
 	find "$appdir" \( -name "*.framework" -or -name "*.dylib" -or -name "*.appex" \) -not -path "*.framework/*" -print0 | xargs -0 codesign --entitlements "$ENTITLEMENTS" -fs "$codesign_name"
 	if [[ $? != 0 ]]; then
 		error "Codesign failed"
 	fi
-	
+
 	codesign -fs "$codesign_name" --entitlements "$ENTITLEMENTS" "$appdir"
 	if [[ $? != 0 ]]; then
 		error "Failed to sign $app"
