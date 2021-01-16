@@ -1,4 +1,5 @@
-
+#!/bin/bash
+set -x
 __currentOS=$(sw_vers | awk '/ProductName:/ {print$2}')
 __CFid=$1
 __newID=$2;
@@ -14,7 +15,7 @@ __convertToPlist(){
 
 __changeBundleID(){
   if [[ $__currentOS == "Mac" ]]; then
-    /usr/libexec/PlistBuddy -c "Add :"$__CFid" string" "$__file"
+    /usr/libexec/PlistBuddy -c "Add :"${__CFid}" string" "$__file"
     /usr/libexec/PlistBuddy -c "Set :"$__CFid" $__newID" "$__file"
     # plutil -replace $__CFid -string "$__newID" "$__file"
   elif [[ $__currentOS == "iPhone" ]]; then
@@ -26,7 +27,7 @@ __changeBundleID(){
 fi
 }
 
-if [[ $__currentOS == "Mac" ]] ; then
+if [[ $__currentOS == "Mac" ]] || [[ $__currentOS == "iPhone" ]] ; then
   __changeBundleID;
 else
   __convertToXML;

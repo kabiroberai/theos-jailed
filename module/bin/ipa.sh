@@ -13,11 +13,14 @@ fi
 
 function change_bundle_id {
 	bundle_id=$(/bin/bash $THEOS/mod/jailed/bin/readPlist.sh "CFBundleIdentifier" "$1")
-	/bin/bash $THEOS/mod/jailed/bin/writePlist.sh CFBundleIdentifier $BUNDLE_ID${bundle_id#$app_bundle_id} "$1"
+	/bin/bash $THEOS/mod/jailed/bin/writePlist.sh "CFBundleIdentifier" $BUNDLE_ID${bundle_id#$app_bundle_id} "$1"
 }
-
+# function change_bundle_id {
+# 	bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$1")
+# 	/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID${bundle_id#$app_bundle_id}" "$1"
+# }
 if [[ -n $BUNDLE_ID ]]; then
-	log 2 "Setting bundle ID"
+	log 2 "Setting bundle ID to (${BUNDLE_ID})"
 	export -f change_bundle_id
 	export app_bundle_id
 	find "$appdir" -name "*.appex" -print0 | xargs -I {} -0 bash -c "change_bundle_id '{}/Info.plist'"
@@ -25,7 +28,7 @@ if [[ -n $BUNDLE_ID ]]; then
 fi
 
 if [[ -n $DISPLAY_NAME ]]; then
-	log 2 "Setting display name"
+	log 2 "Setting display name to (${DISPLAY_NAME})"
 	/bin/bash $THEOS/mod/jailed/bin/writePlist.sh CFBundleDisplayName "$DISPLAY_NAME" "$info_plist"
 fi
 
