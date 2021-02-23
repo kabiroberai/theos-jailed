@@ -13,27 +13,71 @@ SUBSTRATE="lib/CydiaSubstrate_$SUBSTRATE_VERSION.framework"
 
 [ -d "$THEOS" ] || error "\"$THEOS\" is not a directory. Aborting…"
 
-# Install Substrate
-if [[ ! -d module/$SUBSTRATE ]]; then
-	echo "Downloading CydiaSubstrate.framework ($SUBSTRATE_VERSION)…"
-	curl -#Lo substrate.deb "http://apt.saurik.com/debs/mobilesubstrate_${SUBSTRATE_VERSION}_iphoneos-arm.deb"
-	ar -x substrate.deb data.tar.lzma
-	tar --lzma --strip-components 3 -xf data.tar.lzma "$SUBSTRATE_PATH"
-	rm -rf substrate.deb data.tar.lzma 
-	# remove any older copies of Substrate before moving the new one into place
-	rm -rf module/lib/CydiaSubstrate*.framework
-	mv CydiaSubstrate.framework "module/$SUBSTRATE"
-	echo "Successfully installed CydiaSubstrate.framework"
-fi
-plutil -convert binary1 "module/$SUBSTRATE/Info.plist" || true
-rm -rf "module/$SUBSTRATE/Libraries" "module/$SUBSTRATE/Commands"
+echo -e "\n*Choose: \n 1) Install CydiaSubstrate.\nOR \n 2) Install Substitute. \n\nEnter a Number: "
+read CHOICE;
+if [ "$CHOICE" -eq 1 ]; then
+	# Install Substrate
+	if [[ ! -d module/$SUBSTRATE ]]; then
+		echo "Downloading CydiaSubstrate.framework ($SUBSTRATE_VERSION)…"
+		curl -#Lo substrate.deb "http://apt.saurik.com/debs/mobilesubstrate_${SUBSTRATE_VERSION}_iphoneos-arm.deb"
+		ar -x substrate.deb data.tar.lzma
+		tar --lzma --strip-components 3 -xf data.tar.lzma "$SUBSTRATE_PATH"
+		rm -rf substrate.deb data.tar.lzma 
+		# remove any older copies of Substrate and Substitute before moving the new one into place
+		rm -rf module/lib/CydiaSubstrate*.framework
+		rm -f module/lib/libsubstitute.dylib
+		rm -f module/lib/libsubstitute.0.dylib
+		mv CydiaSubstrate.framework "module/$SUBSTRATE"
+		echo "Successfully installed CydiaSubstrate.framework"
+	fi
+		plutil -convert binary1 "module/$SUBSTRATE/Info.plist" || true
+		rm -rf "module/$SUBSTRATE/Libraries" "module/$SUBSTRATE/Commands"
 
+elif [ "$CHOICE" -eq 2 ]; then
+# find 'com.ex.substitute' | list last one | using "sed" remove everything before '<a href=\" ' , remove everything after the first ' "> ' 
+LATEST_SUBSTITUTE="$(wget -q -O - https://apt.bingner.com/debs/1443.00 | grep 'com.ex.substitute' | tail -1 | sed -e 's/.*\<a href=\"//' -e 's/\"\>.*//')"
+SUBSTITUTE_PATH="./usr/lib/libsubstitute.dylib"
+	if [ -z "${LATEST_SUBSTITUTE}" ]; then
+		LATEST_SUBSTITUTE=com.ex.substitute_2.0.7_iphoneos-arm.deb
+	fi
+
+# Install Substitute
+	if [[ ! -d module/$SUBSTITUTE_PATH ]]; then
+		echo "Downloading Substitute ($LATEST_SUBSTITUTE)…"
+		curl -#Lo substitute.deb "https://apt.bingner.com/debs/1443.00/${LATEST_SUBSTITUTE}"
+		ar -x substitute.deb data.tar.lzma
+		tar --lzma --strip-components 2 -xf data.tar.lzma "$SUBSTITUTE_PATH"
+		rm -rf substitute.deb data.tar.lzma 
+		# thinning the binary to remove arm64e
+		lipo -thin arm64 -output libsubstitute.dylib libsubstitute.dylib
+		# change LC_ID to run from rpath
+		install_name_tool -id "@rpath/libsubstitute.0.dylib" libsubstitute.dylib
+		# remove any older copies of Substrate before moving the new one into place
+		rm -rf module/lib/CydiaSubstrate${SUBSTRATE_VERSION}.framework
+		rm -f module/lib/libsubstitute.dylib
+		rm -f module/lib/libsubstitute.0.dylib
+		cp libsubstitute.dylib "module/lib/"
+		cp libsubstitute.dylib "module/lib/libsubstitute.0.dylib"
+		rm libsubstitute.dylib
+		# mv CydiaSubstrate_stub.framework "module/lib/CydiaSubstrate.framework"
+		echo "Successfully installed Substitute"
+	fi
+fi
 # Install module
 ln -fs "$PWD/update" "module/bin/update"
 mkdir -p "$MODULE_PATH"
 rm -rf "$MODULE_PATH"/*
 cp -a module/* "$MODULE_PATH"
+if [ "$CHOICE" -eq 1 ]; then
 mv "$MODULE_PATH/$SUBSTRATE" "$MODULE_PATH/lib/CydiaSubstrate.framework"
+rm "${MODULE_PATH}bin/ipa_substitute.sh"
+rm "${MODULE_PATH}common_substitute.mk"
+elif [ "$CHOICE" -eq 2 ]; then
+rm "${MODULE_PATH}bin/ipa.sh"
+mv "${MODULE_PATH}bin/ipa_substitute.sh" "${MODULE_PATH}bin/ipa.sh"
+rm "${MODULE_PATH}common.mk"
+mv "${MODULE_PATH}common_substitute.mk" "${MODULE_PATH}common.mk"
+fi
 echo "*" > "$MODULE_PATH/.gitignore"
 echo "Successfully installed module."
 
