@@ -5,11 +5,11 @@ cd "$(dirname "$0")"
 function error { echo "Error: $1" >&2; exit 1; }
 
 # Modify these to specify a custom install path
-MODULE_PATH="$THEOS/mod/jailed/"
-TEMPLATE_PATH="$THEOS/templates/ios/kabiroberai/"
+MODULE_PATH="$THEOS/mod/jailed"
+TEMPLATE_PATH="$THEOS/templates/ios/kabiroberai"
 SUBSTRATE_PATH="./Library/Frameworks/CydiaSubstrate.framework"
 SUBSTRATE_VERSION="0.9.6301"
-SUBSTRATE="lib/CydiaSubstrate_$SUBSTRATE_VERSION.framework"
+SUBSTRATE="lib/CydiaSubstrate_${SUBSTRATE_VERSION}.framework"
 
 [ -d "$THEOS" ] || error "\"$THEOS\" is not a directory. Aborting…"
 
@@ -21,17 +21,17 @@ if [ "$CHOICE" -eq 1 ]; then
 		echo "Downloading CydiaSubstrate.framework ($SUBSTRATE_VERSION)…"
 		curl -#Lo substrate.deb "http://apt.saurik.com/debs/mobilesubstrate_${SUBSTRATE_VERSION}_iphoneos-arm.deb"
 		ar -x substrate.deb data.tar.lzma
-		tar --lzma --strip-components 3 -xf data.tar.lzma "$SUBSTRATE_PATH"
+		tar --lzma --strip-components 3 -xf data.tar.lzma "${SUBSTRATE_PATH}"
 		rm -rf substrate.deb data.tar.lzma 
 		# remove any older copies of Substrate and Substitute before moving the new one into place
 		rm -rf module/lib/CydiaSubstrate*.framework
 		rm -f module/lib/libsubstitute.dylib
 		rm -f module/lib/libsubstitute.0.dylib
-		mv CydiaSubstrate.framework "module/$SUBSTRATE"
+		mv CydiaSubstrate.framework "module/${SUBSTRATE}"
 		echo "Successfully installed CydiaSubstrate.framework"
 	fi
-		plutil -convert binary1 "module/$SUBSTRATE/Info.plist" || true
-		rm -rf "module/$SUBSTRATE/Libraries" "module/$SUBSTRATE/Commands"
+		plutil -convert binary1 "module/${SUBSTRATE}/Info.plist" || true
+		rm -rf "module/${SUBSTRATE}/Libraries" "module/${SUBSTRATE}/Commands"
 
 elif [ "$CHOICE" -eq 2 ]; then
 # find 'com.ex.substitute' | list last one | using "sed" remove everything before '<a href=\" ' , remove everything after the first ' "> ' 
@@ -53,7 +53,7 @@ SUBSTITUTE_PATH="./usr/lib/libsubstitute.dylib"
 		# change LC_ID to run from rpath
 		install_name_tool -id "@rpath/libsubstitute.0.dylib" libsubstitute.dylib
 		# remove any older copies of Substrate before moving the new one into place
-		rm -rf module/lib/CydiaSubstrate${SUBSTRATE_VERSION}.framework
+		rm -rf module/lib/CydiaSubstrate_${SUBSTRATE_VERSION}.framework
 		rm -f module/lib/libsubstitute.dylib
 		rm -f module/lib/libsubstitute.0.dylib
 		cp libsubstitute.dylib "module/lib/"
@@ -69,14 +69,19 @@ mkdir -p "$MODULE_PATH"
 rm -rf "$MODULE_PATH"/*
 cp -a module/* "$MODULE_PATH"
 if [ "$CHOICE" -eq 1 ]; then
-mv "$MODULE_PATH/$SUBSTRATE" "$MODULE_PATH/lib/CydiaSubstrate.framework"
-rm "${MODULE_PATH}bin/ipa_substitute.sh"
-rm "${MODULE_PATH}common_substitute.mk"
+mv "$MODULE_PATH/${SUBSTRATE}" "$MODULE_PATH/lib/CydiaSubstrate.framework"
+rm -rf "${MODULE_PATH}/lib/substitute_CydiaSubstrate.framework" # substitute
+rm "${MODULE_PATH}/bin/ipa_substitute.sh"
+rm "${MODULE_PATH}/common_substitute.mk"
+rm -rf module/lib/CydiaSubstrate_0.9.6301.framework
 elif [ "$CHOICE" -eq 2 ]; then
-rm "${MODULE_PATH}bin/ipa.sh"
-mv "${MODULE_PATH}bin/ipa_substitute.sh" "${MODULE_PATH}bin/ipa.sh"
-rm "${MODULE_PATH}common.mk"
-mv "${MODULE_PATH}common_substitute.mk" "${MODULE_PATH}common.mk"
+mv "$MODULE_PATH/lib/substitute_CydiaSubstrate.framework" "$MODULE_PATH/lib/CydiaSubstrate.framework"
+rm "${MODULE_PATH}/bin/ipa.sh"
+mv "${MODULE_PATH}/bin/ipa_substitute.sh" "${MODULE_PATH}/bin/ipa.sh"
+rm "${MODULE_PATH}/common.mk"
+mv "${MODULE_PATH}/common_substitute.mk" "${MODULE_PATH}/common.mk"
+rm -f module/lib/libsubstitute.dylib
+rm -f module/lib/libsubstitute.0.dylib
 fi
 echo "*" > "$MODULE_PATH/.gitignore"
 echo "Successfully installed module."
