@@ -53,6 +53,11 @@ done
 
 log 3 "Injecting dependencies"
 app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$info_plist")"
+
+if [[ $FAKESIGN_IPA = 1 ]]; then
+	ldid -e "$app_binary" > "$appdir/tmp.xml"
+fi
+
 install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary"
 for file in "${inject_files[@]}"; do
 	filename=$(basename "$file")
@@ -63,9 +68,17 @@ for file in "${inject_files[@]}"; do
 	fi
 done
 
+if [[ $FAKESIGN_IPA = 1 ]]; then
+	ldid "-S$appdir/tmp.xml" "$app_binary"
+	rm $appdir/tmp.xml
+fi
+
 chmod +x "$app_binary"
 
-if [[ $_CODESIGN_IPA = 1 ]]; then
+if [[ $FAKESIGN_IPA = 1 ]]; then
+	log 4 "Fakesigning $app"
+	ldid -s "$appdir"
+elif [[ $_CODESIGN_IPA = 1 ]]; then
 	log 4 "Signing $app"
 
 	if [[ ! -r $PROFILE ]]; then
