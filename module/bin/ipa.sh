@@ -54,24 +54,21 @@ done
 log 3 "Injecting dependencies"
 app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$info_plist")"
 
-if [[ $FAKESIGN_IPA = 1 ]]; then
-	ldid -e "$app_binary" > "$appdir/tmp.xml"
-fi
-
 install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary"
 for file in "${inject_files[@]}"; do
 	filename=$(basename "$file")
-	install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$full_copy_path/$filename"
-	"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary"
+	if [[ $FAKESIGN_IPA = 1 ]]; then
+		install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$full_copy_path/$filename"
+		"$INSERT_DYLIB" --inplace --no-strip-codesig "@rpath/$(basename "$file")" "$app_binary"
+	else
+		install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$full_copy_path/$filename"
+		"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary"
+	fi
+
 	if [[ $? != 0 ]]; then
 		error "Failed to inject $filename into $app"
 	fi
 done
-
-if [[ $FAKESIGN_IPA = 1 ]]; then
-	ldid "-S$appdir/tmp.xml" "$app_binary"
-	rm $appdir/tmp.xml
-fi
 
 chmod +x "$app_binary"
 
