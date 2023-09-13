@@ -53,11 +53,18 @@ done
 
 log 3 "Injecting dependencies"
 app_binary="$appdir/$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$info_plist")"
+
 install_name_tool -add_rpath "@executable_path/$COPY_PATH" "$app_binary"
 for file in "${inject_files[@]}"; do
 	filename=$(basename "$file")
-	install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$full_copy_path/$filename"
-	"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary"
+	if [[ $FAKESIGN_IPA = 1 ]]; then
+		install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$full_copy_path/$filename"
+		"$INSERT_DYLIB" --inplace --no-strip-codesig "@rpath/$(basename "$file")" "$app_binary"
+	else
+		install_name_tool -change "$STUB_SUBSTRATE_INSTALL_PATH" "$SUBSTRATE_INSTALL_PATH" "$full_copy_path/$filename"
+		"$INSERT_DYLIB" --inplace --all-yes "@rpath/$(basename "$file")" "$app_binary"
+	fi
+
 	if [[ $? != 0 ]]; then
 		error "Failed to inject $filename into $app"
 	fi
@@ -65,7 +72,10 @@ done
 
 chmod +x "$app_binary"
 
-if [[ $_CODESIGN_IPA = 1 ]]; then
+if [[ $FAKESIGN_IPA = 1 ]]; then
+	log 4 "Fakesigning $app"
+	ldid -s "$appdir"
+elif [[ $_CODESIGN_IPA = 1 ]]; then
 	log 4 "Signing $app"
 
 	if [[ ! -r $PROFILE ]]; then
