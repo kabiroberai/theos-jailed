@@ -6,7 +6,10 @@ To begin developing your first jailed tweak, head over to [Installation](https:/
 
 * Works with the latest and greatest
     - iOS 8 and up
+    with your choice of:
     - CydiaSubstrate.framework (instead of the outdated libsubstrate.dylib)
+    OR
+    - Latest [Substitute](https://apt.bingner.com/info/com.ex.substitute/.)
 * Functions as a module, so it plugs in to Theos. This means you can always use the latest version of Theos with it
 * Colored terminal output (see [Example output](#example-output))
 * Uses `make package install` instead of a shell script --- just like in jailbroken tweaks
