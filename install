@@ -19,13 +19,13 @@ if [[ ! -d module/$SUBSTRATE ]]; then
 	curl -#Lo substrate.deb "http://apt.saurik.com/debs/mobilesubstrate_${SUBSTRATE_VERSION}_iphoneos-arm.deb"
 	ar -x substrate.deb data.tar.lzma
 	tar --lzma --strip-components 3 -xf data.tar.lzma "$SUBSTRATE_PATH"
-	rm -rf substrate.deb data.tar.lzma 
+	rm -rf substrate.deb data.tar.lzma
 	# remove any older copies of Substrate before moving the new one into place
 	rm -rf module/lib/CydiaSubstrate*.framework
 	mv CydiaSubstrate.framework "module/$SUBSTRATE"
 	echo "Successfully installed CydiaSubstrate.framework"
 fi
-plutil -convert binary1 "module/$SUBSTRATE/Info.plist" || true
+plutil -convert binary1 "module/$SUBSTRATE/Info.plist" 2> /dev/null || true
 rm -rf "module/$SUBSTRATE/Libraries" "module/$SUBSTRATE/Commands"
 
 # Install module
