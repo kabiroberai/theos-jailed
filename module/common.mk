@@ -48,7 +48,8 @@ export USE_OVERLAY = $(call __theos_bool,$($(TWEAK_NAME)_USE_OVERLAY))
 export OVERLAY ?= $(THEOS_JAILED_LIB)/Overlay.dylib
 
 # CydiaSubstrate
-export GENERATOR = $(or $($(TWEAK_NAME)_LOGOS_DEFAULT_GENERATOR),$(LOGOS_DEFAULT_GENERATOR),$(_THEOS_TARGET_LOGOS_DEFAULT_GENERATOR),MobileSubstrate)
+_NEEDS_LOGOS = $(if $(shell find $(PWD) -name "*.theos*" -prune -o -type f -name "*.x*" -print),$(_THEOS_TRUE),$(_THEOS_FALSE))
+export GENERATOR = $(or $($(TWEAK_NAME)_LOGOS_DEFAULT_GENERATOR),$(LOGOS_DEFAULT_GENERATOR),$(_THEOS_TARGET_LOGOS_DEFAULT_GENERATOR),$(if $(_NEEDS_LOGOS),MobileSubstrate,internal))
 export SUBSTRATE ?= $(THEOS_JAILED_LIB)/CydiaSubstrate.framework
 export STUB_SUBSTRATE_INSTALL_PATH = /Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate
 export SUBSTRATE_INSTALL_PATH = @rpath/CydiaSubstrate.framework/CydiaSubstrate
